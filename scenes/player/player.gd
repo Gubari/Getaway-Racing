@@ -18,6 +18,9 @@ extends CharacterBody2D
 @export var crash_stun_sec: float = 0.25
 @export var crash_knockback_distance: float = 12.0
 @export var crash_loot_penalty: float = 15.0
+@export var sharp_turn_loot_penalty: float = 1.5
+@export var crash_shake_strength: float = 6.0
+@export var crash_shake_duration: float = 0.15
 @export var sharp_turn_cooldown: float = 0.35
 @export var sharp_turn_min_speed: float = 120.0
 @export var sharp_turn_angular_speed_deg: float = 220.0
@@ -30,12 +33,23 @@ var _sharp_turn_cooldown_left: float = 0.0
 var _prev_rotation: float = 0.0
 var _crash_stun_until_ms: int = 0
 var _wall_penalty_rearm_until_ms: Dictionary = {}
+var _shake_time_left: float = 0.0
+
+@onready var _camera: Camera2D = $Camera2D
 
 func _ready() -> void:
 	add_to_group(Constants.GROUP_PLAYER)
 	GameState.card_played.connect(_on_card_played)
 	_prev_rotation = rotation
+	_camera.make_current()
 	queue_redraw()
+
+func setup_camera_limits(arena: Rect2) -> void:
+	_camera.limit_left = int(arena.position.x)
+	_camera.limit_top = int(arena.position.y)
+	_camera.limit_right = int(arena.position.x + arena.size.x)
+	_camera.limit_bottom = int(arena.position.y + arena.size.y)
+	_camera.limit_smoothed = true
 
 func _physics_process(delta: float) -> void:
 	if not GameState.is_running:
@@ -63,6 +77,15 @@ func _process(delta: float) -> void:
 		_nitro_time_left = maxf(0.0, _nitro_time_left - delta)
 	if _sharp_turn_cooldown_left > 0.0:
 		_sharp_turn_cooldown_left = maxf(0.0, _sharp_turn_cooldown_left - delta)
+	_update_camera_shake(delta)
+
+func _update_camera_shake(delta: float) -> void:
+	if _shake_time_left <= 0.0:
+		_camera.offset = Vector2.ZERO
+		return
+	_shake_time_left = maxf(0.0, _shake_time_left - delta)
+	var t := _shake_time_left / crash_shake_duration if crash_shake_duration > 0.0 else 0.0
+	_camera.offset = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * crash_shake_strength * t
 
 func _get_throttle() -> float:
 	var throttle := (
@@ -140,6 +163,7 @@ func _detect_wall_crash(pre_move_velocity: Vector2) -> void:
 func _apply_wall_crash(collision: KinematicCollision2D) -> void:
 	var normal := collision.get_normal()
 	_crash_stun_until_ms = Time.get_ticks_msec() + int(crash_stun_sec * 1000.0)
+	_shake_time_left = crash_shake_duration
 	_forward_speed = 0.0
 	global_position += normal * crash_knockback_distance
 	velocity = Vector2.from_angle(rotation) * _forward_speed
@@ -158,7 +182,7 @@ func _detect_sharp_turn(delta: float) -> void:
 	if angular_speed_deg < sharp_turn_angular_speed_deg:
 		return
 
-	GameState.sharp_turn.emit()
+	GameState.sharp_turn.emit(sharp_turn_loot_penalty)
 	_sharp_turn_cooldown_left = sharp_turn_cooldown
 
 func _draw() -> void:
