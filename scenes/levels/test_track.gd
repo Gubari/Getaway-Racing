@@ -27,6 +27,9 @@ func _ready() -> void:
 	_base.body_entered.connect(_on_base_body_entered)
 	queue_redraw()
 
+func get_arena_rect() -> Rect2:
+	return ARENA
+
 func get_player_spawn() -> Vector2:
 	return Vector2(150, 450)
 
