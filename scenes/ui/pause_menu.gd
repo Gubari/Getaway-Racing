@@ -83,7 +83,10 @@ func _close() -> void:
 	_dim.visible = false
 	_pause_panel.visible = false
 	_settings_panel.visible = false
-	_pause_button.visible = GameState.is_running
+	# Dugme se prikazuje po defaultu (trka jos mozda nije startovala u trenutku
+	# _ready, jer dete dobije _ready pre roditelja koji zove start_run()).
+	# Skrivamo ga samo kad je pauzirano ili kad je trka gotova (_force_close).
+	_pause_button.visible = true
 
 func _force_close() -> void:
 	get_tree().paused = false
