@@ -25,8 +25,7 @@ extends CharacterBody2D
 @export var crash_loot_penalty: float = 15.0
 @export var crash_knockback_min: float = 16.0
 @export var crash_knockback_impact_scale: float = 0.035
-@export var crash_bounce_back_ratio: float = 0.14
-@export var crash_steer_lock_sec: float = 0.18
+@export var crash_steer_lock_sec: float = 0.3
 @export var crash_shake_strength: float = 14.0
 @export var crash_shake_duration: float = 0.24
 @export var crash_zoom_punch: float = 0.07
@@ -81,12 +80,16 @@ func _physics_process(delta: float) -> void:
 
 	var throttle := _get_throttle()
 	var steer_input := _get_steer_input()
-	if Time.get_ticks_msec() < _crash_steer_lock_until_ms:
+	var steer_locked := Time.get_ticks_msec() < _crash_steer_lock_until_ms
+	if steer_locked:
 		steer_input = 0.0
-	_steer_smoothed = lerpf(_steer_smoothed, steer_input, steering_smoothing * delta)
+		_steer_smoothed = 0.0
+	else:
+		_steer_smoothed = lerpf(_steer_smoothed, steer_input, steering_smoothing * delta)
 
 	_update_forward_speed(throttle, delta)
-	_apply_steering(delta)
+	if not steer_locked:
+		_apply_steering(delta)
 
 	velocity = Vector2.from_angle(rotation) * _forward_speed
 	var pre_move_velocity := velocity
@@ -205,12 +208,12 @@ func _apply_wall_crash(collision: KinematicCollision2D, impact_speed: float) -> 
 	_crash_juice_time_left = crash_shake_duration
 	_crash_juice_intensity = intensity
 	_crash_wobble = deg_to_rad(crash_wobble_max_deg) * intensity * (1.0 if randf() > 0.5 else -1.0)
-	rotation += _crash_wobble
+	_steer_smoothed = 0.0
 
 	var knockback := crash_knockback_min + impact_speed * crash_knockback_impact_scale
 	global_position += normal * knockback
-	_forward_speed = -impact_speed * crash_bounce_back_ratio
-	velocity = Vector2.from_angle(rotation) * _forward_speed
+	_forward_speed = 0.0
+	velocity = Vector2.ZERO
 	queue_redraw()
 
 func _detect_sharp_turn(delta: float) -> void:
@@ -233,12 +236,15 @@ func _detect_sharp_turn(delta: float) -> void:
 func _draw() -> void:
 	var squash := 1.0
 	var stretch := 1.0
+	var wobble_angle := 0.0
 	if _crash_juice_time_left > 0.0 and crash_shake_duration > 0.0:
 		var t := _crash_juice_time_left / crash_shake_duration
 		squash = 1.0 + crash_squash_amount * t
 		stretch = 1.0 - crash_squash_amount * 0.75 * t
+		wobble_angle = _crash_wobble * t
 
-	var forward := Vector2.from_angle(rotation)
+	# Lokalni prostor: nos auta je uvek +X (rotation cvora vec okrece sprite).
+	var forward := Vector2.RIGHT.rotated(wobble_angle)
 	var right := forward.orthogonal()
 
 	var body := PackedVector2Array([
