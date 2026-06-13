@@ -10,10 +10,30 @@ extends Node2D
 func _ready() -> void:
 	_setup_spawns()
 	_setup_camera()
+	_setup_run()
+
+func _setup_run() -> void:
 	var starting_loot := 100_000.0
 	if _level.has_method("get_starting_loot"):
 		starting_loot = _level.get_starting_loot()
+	if _level.has_method("get_heat_tier_maxes"):
+		var tiers: Vector3i = _level.get_heat_tier_maxes()
+		GameState.configure_heat_tiers(tiers.x, tiers.y, tiers.z)
+	else:
+		GameState.configure_heat_tiers(3, 6, 9)
 	GameState.start_run(starting_loot)
+
+func _process(_delta: float) -> void:
+	if not GameState.is_running:
+		return
+	var pursuit_count := 0
+	var searching_count := 0
+	for node in get_tree().get_nodes_in_group(Constants.GROUP_POLICE):
+		if node.has_method("is_searching") and node.is_searching():
+			searching_count += 1
+		if node.has_method("is_actively_pursuing") and node.is_actively_pursuing():
+			pursuit_count += 1
+	GameState.update_heat_from_police(pursuit_count, searching_count)
 
 func _setup_spawns() -> void:
 	if _level.has_method("get_player_spawn"):

@@ -12,20 +12,36 @@ extends CanvasLayer
 @onready var _blocked_label: Label = $Control/BlockedPanel/MarginContainer/BlockedLabel
 
 var _blocked_hide_left: float = 0.0
+var _heat_display_level: int = 0
+var _heat_blink_active: bool = false
+var _heat_blink_timer: float = 0.0
+
+const _HEAT_BLINK_INTERVAL := 0.35
 
 func _ready() -> void:
 	GameState.loot_changed.connect(_on_loot_changed)
 	GameState.heat_changed.connect(_on_heat_changed)
+	GameState.heat_blink_changed.connect(_on_heat_blink_changed)
 	GameState.game_won.connect(_on_game_won)
 	GameState.game_over.connect(_on_game_over)
 	GameState.garage_blocked.connect(_on_garage_blocked)
 	_on_loot_changed(GameState.loot_amount)
-	_on_heat_changed(GameState.heat)
+	_on_heat_changed(GameState.heat_level)
+	_on_heat_blink_changed(GameState.heat_blink_active)
 	_win_panel.visible = false
 	_game_over_panel.visible = false
 	_blocked_panel.visible = false
 
 func _process(delta: float) -> void:
+	if _heat_blink_active and GameState.is_running:
+		_heat_blink_timer += delta
+		var blink_on := int(_heat_blink_timer / _HEAT_BLINK_INTERVAL) % 2 == 0
+		_heat_label.modulate = Color(1.0, 1.0, 1.0, 1.0 if blink_on else 0.2)
+	else:
+		_heat_blink_timer = 0.0
+		if _heat_label.modulate.a != 1.0:
+			_heat_label.modulate = Color.WHITE
+
 	if _blocked_hide_left <= 0.0:
 		return
 	_blocked_hide_left = maxf(0.0, _blocked_hide_left - delta)
@@ -35,8 +51,14 @@ func _process(delta: float) -> void:
 func _on_loot_changed(value: float) -> void:
 	_loot_label.text = "Plen: %s" % GameState.format_loot(value)
 
-func _on_heat_changed(value: float) -> void:
-	_heat_label.text = "Heat: %d" % roundi(value)
+func _on_heat_changed(level: int) -> void:
+	_heat_display_level = level
+	_heat_label.text = "Heat: %d" % _heat_display_level
+
+func _on_heat_blink_changed(active: bool) -> void:
+	_heat_blink_active = active
+	if not active:
+		_heat_label.modulate = Color.WHITE
 
 func _on_game_won() -> void:
 	_win_label.text = "Pobeda!\nPlen: %s" % GameState.format_loot(GameState.loot_amount)

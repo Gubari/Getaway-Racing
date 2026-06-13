@@ -19,6 +19,9 @@ script = ExtResource("1")
 
 [node name="City" parent="." unique_id=385713939 instance=ExtResource("2_hujxm")]
 starting_loot = 1200000.0
+heat_tier_1_max_cars = 2
+heat_tier_2_max_cars = 3
+heat_tier_3_max_cars = 5
 
 [node name="NavRegion" parent="." unique_id=1762320978 instance=ExtResource("9")]
 
