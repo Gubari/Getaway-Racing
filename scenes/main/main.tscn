@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/cards/card_manager.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/levels/test_track.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/levels/garage.tscn" id="7"]
 
 [node name="Main" type="Node2D" unique_id=1089452316]
 script = ExtResource("1")
@@ -18,6 +19,9 @@ crash_loot_penalty = 10.0
 
 [node name="Police" parent="." unique_id=1061832071 instance=ExtResource("3")]
 position = Vector2(150, 200)
+
+[node name="Garage" parent="." unique_id=1636931700 instance=ExtResource("7")]
+position = Vector2(1200, 450)
 
 [node name="CardManager" parent="." unique_id=1632859727 instance=ExtResource("4")]
 

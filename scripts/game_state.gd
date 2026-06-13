@@ -26,6 +26,11 @@ signal nitro_used                 # nitro aktiviran -> trese plen (malo)
 signal card_played(card_type: int)   # A slusa (npr. nitro = burst brzine)
 
 # ------------------------------------------------------------------
+# SIGNALI: garaža / level          (EMITUJE: Garage -> A)
+# ------------------------------------------------------------------
+signal garage_blocked(message: String)   # D slusa za HUD poruku
+
+# ------------------------------------------------------------------
 # SIGNALI: stanje igre / statovi   (EMITUJE: GameState)
 # ------------------------------------------------------------------
 signal loot_changed(value: float)    # D slusa za HUD

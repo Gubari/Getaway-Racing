@@ -3,8 +3,6 @@ extends Node2D
 ## C zamenjuje tile-ovima kasnije; zidovi ostaju StaticBody2D na layer 3.
 
 const ARENA := Rect2(50, 50, 1300, 800)
-const BASE_CENTER := Vector2(1200, 450)
-const BASE_SIZE := Vector2(100, 100)
 
 const WALL_RECTS: Array[Rect2] = [
 	Rect2(50, 50, 1300, 40),
@@ -19,12 +17,10 @@ const WALL_RECTS: Array[Rect2] = [
 ]
 
 @onready var _walls: Node2D = $Walls
-@onready var _base: Area2D = $Base
 
 func _ready() -> void:
 	for rect in WALL_RECTS:
 		_walls.add_child(_make_wall(rect))
-	_base.body_entered.connect(_on_base_body_entered)
 	queue_redraw()
 
 func get_arena_rect() -> Rect2:
@@ -35,6 +31,9 @@ func get_player_spawn() -> Vector2:
 
 func get_police_spawn() -> Vector2:
 	return Vector2(150, 200)
+
+func get_garage_spawn() -> Vector2:
+	return Vector2(1200, 450)
 
 func _make_wall(rect: Rect2) -> StaticBody2D:
 	var body := StaticBody2D.new()
@@ -67,5 +66,3 @@ func _on_base_body_entered(body: Node2D) -> void:
 
 func _draw() -> void:
 	draw_rect(ARENA, Color(0.12, 0.14, 0.18))
-	var base_rect := Rect2(BASE_CENTER - BASE_SIZE * 0.5, BASE_SIZE)
-	draw_rect(base_rect, Color(0.2, 0.75, 0.35, 0.35))
