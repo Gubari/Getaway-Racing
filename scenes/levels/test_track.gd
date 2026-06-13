@@ -7,6 +7,11 @@ const ARENA := Rect2(50, 50, 1300, 800)
 @export_group("Heist")
 @export var starting_loot: float = 100_000.0
 
+@export_group("Heat")
+@export var heat_tier_1_max_cars: int = 3
+@export var heat_tier_2_max_cars: int = 6
+@export var heat_tier_3_max_cars: int = 9
+
 const WALL_RECTS: Array[Rect2] = [
 	Rect2(50, 50, 1300, 40),
 	Rect2(50, 810, 1300, 40),
@@ -28,6 +33,9 @@ func _ready() -> void:
 
 func get_starting_loot() -> float:
 	return starting_loot
+
+func get_heat_tier_maxes() -> Vector3i:
+	return Vector3i(heat_tier_1_max_cars, heat_tier_2_max_cars, heat_tier_3_max_cars)
 
 func get_arena_rect() -> Rect2:
 	return ARENA

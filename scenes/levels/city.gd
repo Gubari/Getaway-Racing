@@ -5,6 +5,12 @@ extends Node2D
 @export_group("Heist")
 @export var starting_loot: float = 100_000.0
 
+@export_group("Heat")
+## Max broj vozila u poteri za heat 1/2/3. Preko tier 3 -> heat 4.
+@export var heat_tier_1_max_cars: int = 3
+@export var heat_tier_2_max_cars: int = 6
+@export var heat_tier_3_max_cars: int = 9
+
 @export var arena_rect: Rect2 = Rect2(0, 0, 2048, 2048)
 @export var player_spawn: Vector2 = Vector2(150, 450)
 @export var police_spawn: Vector2 = Vector2(150, 200)
@@ -17,6 +23,9 @@ func _ready() -> void:
 
 func get_starting_loot() -> float:
 	return starting_loot
+
+func get_heat_tier_maxes() -> Vector3i:
+	return Vector3i(heat_tier_1_max_cars, heat_tier_2_max_cars, heat_tier_3_max_cars)
 
 func get_arena_rect() -> Rect2:
 	return arena_rect

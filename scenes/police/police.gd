@@ -240,7 +240,6 @@ func _do_returning(delta: float, can_see: bool) -> void:
 	if can_see:
 		state = State.CHASE   # cim te spaze -> instant CHASE
 		return
-	GameState.add_heat(-15.0 * delta)   # heat opada
 	_move(delta, return_speed)
 	# lagano krstari po zoni - nije aktivna potera, ali nije ni mrtav
 	if _arrived() or _is_stuck(delta):
@@ -315,6 +314,12 @@ func _patrol_point() -> Vector2:
 
 func is_returning() -> bool:
 	return state == State.RETURNING
+
+func is_searching() -> bool:
+	return state == State.SEARCHING
+
+func is_actively_pursuing() -> bool:
+	return state == State.CHASE or state == State.SEARCHING
 
 # --- VIZUELNI KONUS (ziri mora da vidi "kad me vide") ---
 func _draw() -> void:
