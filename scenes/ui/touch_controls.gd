@@ -57,6 +57,7 @@ func _ready() -> void:
 
 	_click_player = AudioStreamPlayer.new()
 	_click_player.stream = load("res://assets/audio/sfx/ui_click.wav")
+	_click_player.bus = "SFX"
 	add_child(_click_player)
 
 	if show_input_debug:
