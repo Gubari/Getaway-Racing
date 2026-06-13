@@ -21,6 +21,8 @@ enum State { CHASE, SEARCHING, RETURNING }
 @export var patrol_radius: float = 140.0      # radijus laganog krstarenja u RETURNING
 @export var catch_distance: float = 28.0      # kad te stigne izbliza -> uhvacen
 @export var turn_speed: float = 9.0           # glatkoca rotacije (lerp)
+@export var skid_spin: float = 7.0            # brzina vrtnje dok je bez kontrole (ulje)
+@export var skid_friction: float = 160.0      # koliko brzo klizanje usporava
 
 @export_group("Sprite")
 @export var car_anim_fps: float = 14.0
@@ -40,9 +42,9 @@ var search_timer: float = 0.0
 var look_timer: float = 0.0
 var lose_timer: float = 0.0                    # grace dok jos "pamti" igraca u CHASE
 
-# usporavanje od moci (ulje/barikada)
-var _slow_factor: float = 1.0                  # 1.0 = puna brzina, <1 = sporije
-var _slow_timer: float = 0.0
+# gubitak kontrole od ulja (klizanje + vrtnja)
+var _control_lost_timer: float = 0.0
+var _spin_dir: float = 1.0
 
 # watchdog protiv zaglavljivanja
 var _last_dist: float = INF
@@ -68,10 +70,8 @@ func _physics_process(delta: float) -> void:
 		player = get_tree().get_first_node_in_group(Constants.GROUP_PLAYER)
 		return
 
-	if _slow_timer > 0.0:
-		_slow_timer -= delta
-		if _slow_timer <= 0.0:
-			_slow_factor = 1.0
+	if _control_lost_timer > 0.0:
+		_control_lost_timer -= delta
 
 	var can_see := _can_see_player()
 	match state:
@@ -209,6 +209,9 @@ func _set_target(t: Vector2) -> void:
 	_stuck_timer = 0.0
 
 func _move(delta: float, speed: float) -> void:
+	if _control_lost_timer > 0.0:
+		_skid(delta)   # na ulju: ne slusa navmesh, klizi i vrti se
+		return
 	if agent.is_navigation_finished():
 		velocity = Vector2.ZERO
 		move_and_slide()
@@ -217,13 +220,19 @@ func _move(delta: float, speed: float) -> void:
 	var next_point := agent.get_next_path_position()
 	var desired := (next_point - global_position).normalized()
 	rotation = lerp_angle(rotation, desired.angle(), turn_speed * delta)
-	velocity = Vector2.RIGHT.rotated(rotation) * speed * _slow_factor   # vozi po nosu, usporeno ako je u ulju
+	velocity = Vector2.RIGHT.rotated(rotation) * speed   # vozi NAPRED po nosu (car-feel)
 	move_and_slide()
 
-## Pozivaju je prepreke (ulje/barikada) dok je policija u njihovoj zoni.
-func apply_slow(factor: float, duration: float) -> void:
-	_slow_factor = factor
-	_slow_timer = maxf(_slow_timer, duration)
+## Poziva je ULJE: policija gubi kontrolu (klizi po inerciji + vrti se) `duration` sek.
+func lose_control(duration: float) -> void:
+	if _control_lost_timer <= 0.0:
+		_spin_dir = 1.0 if randf() < 0.5 else -1.0   # nasumican smer vrtnje
+	_control_lost_timer = maxf(_control_lost_timer, duration)
+
+func _skid(delta: float) -> void:
+	rotation += _spin_dir * skid_spin * delta
+	velocity = velocity.move_toward(Vector2.ZERO, skid_friction * delta)
+	move_and_slide()
 
 func _arrived() -> bool:
 	return agent.is_navigation_finished()

@@ -1,14 +1,13 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://scenes/cards/slow_zone.gd" id="1"]
+[ext_resource type="Script" path="res://scenes/cards/oil.gd" id="1"]
 
 [sub_resource type="CircleShape2D" id="1"]
 radius = 46.0
 
 [node name="Oil" type="Area2D"]
 script = ExtResource("1")
-slow_factor = 0.5
-slow_duration = 1.2
+control_loss = 1.1
 lifetime = 7.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
