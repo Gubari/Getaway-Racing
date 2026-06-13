@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Card" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/cards/card.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/cards/oil.tscn" id="2"]
+
+[resource]
+script = ExtResource("1")
+type = 1
+display_name = "Ulje"
+description = "Klizava mrlja - blago usporava poteru. Ne kosta plen."
+cooldown = 0.0
+max_charges = 2
+effect_scene = ExtResource("2")
