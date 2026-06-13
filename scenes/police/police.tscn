@@ -17,3 +17,7 @@ shape = SubResource("1")
 
 [node name="LineOfSight" type="RayCast2D" parent="."]
 target_position = Vector2(350, 0)
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+radius = 24.0
+avoidance_enabled = false
