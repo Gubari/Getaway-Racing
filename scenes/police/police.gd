@@ -229,6 +229,9 @@ func _random_search_point() -> Vector2:
 func _patrol_point() -> Vector2:
 	return last_known_pos + Vector2(randf_range(-patrol_radius, patrol_radius), randf_range(-patrol_radius, patrol_radius))
 
+func is_returning() -> bool:
+	return state == State.RETURNING
+
 # --- VIZUELNI KONUS (ziri mora da vidi "kad me vide") ---
 func _draw() -> void:
 	var col := Color.RED

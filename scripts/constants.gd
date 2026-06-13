@@ -9,6 +9,7 @@ class_name Constants
 const GROUP_PLAYER := "player"
 const GROUP_POLICE := "police"
 const GROUP_WALLS := "walls"
+const GROUP_GARAGE := "garage"
 
 # --- COLLISION LAYER VREDNOSTI (bitmask) ---
 # Project Settings -> Layer Names -> 2D Physics mora da se poklapa:
