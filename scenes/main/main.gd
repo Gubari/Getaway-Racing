@@ -2,7 +2,7 @@ extends Node2D
 ## Glavna scena - vezuje sve zajedno. Startuje trku.
 ## Vlasnik: zajednicki (instancira tudje scene, ne dira njihovu logiku).
 
-@onready var _level: Node2D = $TestTrack
+@onready var _level: Node2D = $City
 @onready var _player: CharacterBody2D = $Player
 @onready var _police: CharacterBody2D = $Police
 @onready var _garage: Area2D = $Garage

@@ -76,3 +76,6 @@ func reach_base() -> void:   # pozovi kad igrac stigne do baze
 func caught() -> void:       # pozovi kad policija uhvati igraca
 	is_running = false
 	game_over.emit()
+
+func abandon() -> void:      # igrac odustao od pljacke (pause meni)
+	is_running = false
