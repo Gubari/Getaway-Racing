@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/cards/slow_zone.gd" id="1"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(96, 36)
+
+[node name="Barricade" type="Area2D"]
+script = ExtResource("1")
+slow_factor = 0.15
+slow_duration = 1.8
+lifetime = 5.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("1")
+
+[node name="Visual" type="Polygon2D" parent="."]
+color = Color(0.95, 0.55, 0.1, 0.95)
+polygon = PackedVector2Array(-48, -18, 48, -18, 48, 18, -48, 18)
+
+[node name="Stripe" type="Polygon2D" parent="."]
+color = Color(0.1, 0.1, 0.12, 1)
+polygon = PackedVector2Array(-48, -4, 48, -4, 48, 4, -48, 4)

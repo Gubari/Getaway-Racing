@@ -1,12 +1,11 @@
-[gd_resource type="TileSet" load_steps=7 format=3]
+[gd_resource type="TileSet" format=3 uid="uid://dgaixu6b214ep"]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/tiles/2_City_Terrains_16x16.png" id="1_terr"]
-[ext_resource type="Texture2D" path="res://assets/sprites/tiles/3_City_Props_16x16.png" id="2_prop"]
-[ext_resource type="Texture2D" path="res://assets/sprites/tiles/4_Generic_Buildings_16x16.png" id="3_bldg"]
+[ext_resource type="Texture2D" uid="uid://wdwn7lbisbvd" path="res://assets/sprites/tiles/2_City_Terrains_16x16.png" id="1_terr"]
+[ext_resource type="Texture2D" uid="uid://bvc6xadyhgdyk" path="res://assets/sprites/tiles/3_City_Props_16x16.png" id="2_prop"]
+[ext_resource type="Texture2D" uid="uid://4ulluyksajg" path="res://assets/sprites/tiles/4_Generic_Buildings_16x16.png" id="3_bldg"]
 
 [sub_resource type="TileSetAtlasSource" id="src_terr"]
 texture = ExtResource("1_terr")
-texture_region_size = Vector2i(16, 16)
 0:0/0 = 0
 1:0/0 = 0
 2:0/0 = 0
@@ -3850,7 +3849,6 @@ texture_region_size = Vector2i(16, 16)
 
 [sub_resource type="TileSetAtlasSource" id="src_prop"]
 texture = ExtResource("2_prop")
-texture_region_size = Vector2i(16, 16)
 16:0/0 = 0
 16:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 17:0/0 = 0
@@ -12544,7 +12542,6 @@ texture_region_size = Vector2i(16, 16)
 
 [sub_resource type="TileSetAtlasSource" id="src_bldg"]
 texture = ExtResource("3_bldg")
-texture_region_size = Vector2i(16, 16)
 0:1/0 = 0
 0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 1:1/0 = 0
@@ -20300,7 +20297,6 @@ texture_region_size = Vector2i(16, 16)
 
 [resource]
 physics_layer_0/collision_layer = 4
-tile_size = Vector2i(16, 16)
 sources/0 = SubResource("src_terr")
 sources/1 = SubResource("src_prop")
 sources/2 = SubResource("src_bldg")

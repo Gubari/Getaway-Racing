@@ -33,6 +33,10 @@ var search_timer: float = 0.0
 var look_timer: float = 0.0
 var lose_timer: float = 0.0                    # grace dok jos "pamti" igraca u CHASE
 
+# usporavanje od moci (ulje/barikada)
+var _slow_factor: float = 1.0                  # 1.0 = puna brzina, <1 = sporije
+var _slow_timer: float = 0.0
+
 # watchdog protiv zaglavljivanja
 var _last_dist: float = INF
 var _stuck_timer: float = 0.0
@@ -53,6 +57,11 @@ func _physics_process(delta: float) -> void:
 	if player == null:
 		player = get_tree().get_first_node_in_group(Constants.GROUP_PLAYER)
 		return
+
+	if _slow_timer > 0.0:
+		_slow_timer -= delta
+		if _slow_timer <= 0.0:
+			_slow_factor = 1.0
 
 	var can_see := _can_see_player()
 	match state:
@@ -181,8 +190,13 @@ func _move(delta: float, speed: float) -> void:
 	var next_point := agent.get_next_path_position()
 	var desired := (next_point - global_position).normalized()
 	rotation = lerp_angle(rotation, desired.angle(), turn_speed * delta)
-	velocity = Vector2.RIGHT.rotated(rotation) * speed   # vozi NAPRED po nosu (car-feel)
+	velocity = Vector2.RIGHT.rotated(rotation) * speed * _slow_factor   # vozi po nosu, usporeno ako je u ulju
 	move_and_slide()
+
+## Pozivaju je prepreke (ulje/barikada) dok je policija u njihovoj zoni.
+func apply_slow(factor: float, duration: float) -> void:
+	_slow_factor = factor
+	_slow_timer = maxf(_slow_timer, duration)
 
 func _arrived() -> bool:
 	return agent.is_navigation_finished()

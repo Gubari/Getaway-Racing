@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/cards/slow_zone.gd" id="1"]
+
+[sub_resource type="CircleShape2D" id="1"]
+radius = 46.0
+
+[node name="Oil" type="Area2D"]
+script = ExtResource("1")
+slow_factor = 0.5
+slow_duration = 1.2
+lifetime = 7.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("1")
+
+[node name="Visual" type="Polygon2D" parent="."]
+color = Color(0.08, 0.07, 0.12, 0.85)
+polygon = PackedVector2Array(-46, -10, -28, -34, 8, -42, 40, -24, 46, 6, 30, 34, -6, 44, -38, 26)
