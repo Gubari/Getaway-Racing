@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://b2xtd3m2ggr8i" path="res://assets/sprites/vehicles/player_car_drive.png" id="2"]
 
 [sub_resource type="RectangleShape2D" id="1"]
-size = Vector2(32, 48)
+size = Vector2(44, 24)
 
 [node name="Player" type="CharacterBody2D" unique_id=731337925 groups=["player"]]
 collision_mask = 4

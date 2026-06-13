@@ -26,7 +26,7 @@ heat_tier_3_max_cars = 5
 [node name="NavRegion" parent="." unique_id=1762320978 instance=ExtResource("9")]
 
 [node name="Player" parent="." unique_id=1188349856 instance=ExtResource("2")]
-position = Vector2(150, 450)
+position = Vector2(79, 474)
 wall_penalty_rearm_sec = 0.5
 crash_stun_sec = 0.2
 crash_loot_penalty = 10.0
