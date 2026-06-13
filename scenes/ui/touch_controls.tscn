@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://dctq1ea7f8kuq"]
+
+[ext_resource type="Script" uid="uid://bl3h74w5qir18" path="res://scenes/ui/touch_controls.gd" id="1"]
+
+[node name="TouchControls" type="Control" unique_id=806955262]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("1")
+
+[node name="SteerLeftZone" type="TouchScreenButton" parent="." unique_id=546927277]
+visibility_mode = 1
+
+[node name="SteerRightZone" type="TouchScreenButton" parent="." unique_id=1614057737]
+visibility_mode = 1
+
+[node name="BrakeButton" type="TouchScreenButton" parent="." unique_id=1752336835]
+visibility_mode = 1
+
+[node name="GasButton" type="TouchScreenButton" parent="." unique_id=1962549613]
+visibility_mode = 1
+
+[node name="LabelsLayer" type="Control" parent="." unique_id=1104259578]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
