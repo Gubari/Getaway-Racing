@@ -4,6 +4,9 @@ extends Node2D
 
 const ARENA := Rect2(50, 50, 1300, 800)
 
+@export_group("Heist")
+@export var starting_loot: float = 100_000.0
+
 const WALL_RECTS: Array[Rect2] = [
 	Rect2(50, 50, 1300, 40),
 	Rect2(50, 810, 1300, 40),
@@ -22,6 +25,9 @@ func _ready() -> void:
 	for rect in WALL_RECTS:
 		_walls.add_child(_make_wall(rect))
 	queue_redraw()
+
+func get_starting_loot() -> float:
+	return starting_loot
 
 func get_arena_rect() -> Rect2:
 	return ARENA

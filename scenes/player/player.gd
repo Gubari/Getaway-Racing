@@ -22,7 +22,7 @@ extends CharacterBody2D
 @export var wall_penalty_rearm_sec: float = 0.75
 @export var crash_min_impact_speed: float = 70.0
 @export var crash_stun_sec: float = 0.3
-@export var crash_loot_penalty: float = 15.0
+@export var crash_loot_penalty: float = 15.0   ## % od starting_loot (15 = 15k pri 100k)
 @export var crash_knockback_min: float = 16.0
 @export var crash_knockback_impact_scale: float = 0.035
 @export var crash_steer_lock_sec: float = 0.3
@@ -37,20 +37,16 @@ extends CharacterBody2D
 @export var car_anim_frames: int = 6
 
 @export_group("Sharp Turn")
-@export var sharp_turn_loot_penalty: float = 1.5
+@export var sharp_turn_loot_penalty: float = 1.5   ## % od starting_loot
 @export var sharp_turn_cooldown: float = 0.35
 @export var sharp_turn_min_speed: float = 110.0
 @export var sharp_turn_angular_speed_deg: float = 210.0
 @export var sharp_turn_steer_threshold: float = 0.4
 
-var _forward_speed: float = 0.0
-var _steer_smoothed: float = 0.0
+var _drive := TopDownCarDriving.new()
 var _nitro_time_left: float = 0.0
 var _sharp_turn_cooldown_left: float = 0.0
 var _prev_rotation: float = 0.0
-var _crash_stun_until_ms: int = 0
-var _crash_steer_lock_until_ms: int = 0
-var _wall_penalty_rearm_until_ms: Dictionary = {}
 var _shake_time_left: float = 0.0
 var _shake_normal: Vector2 = Vector2.ZERO
 var _crash_juice_time_left: float = 0.0
@@ -68,7 +64,25 @@ func _ready() -> void:
 	_prev_rotation = rotation
 	_camera_base_zoom = _camera.zoom
 	_camera.make_current()
+	_sync_drive_params()
 	_update_car_sprite()
+
+func _sync_drive_params() -> void:
+	_drive.acceleration = acceleration
+	_drive.max_speed = max_speed
+	_drive.reverse_max_speed = reverse_max_speed
+	_drive.drag = drag
+	_drive.brake_force = brake_force
+	_drive.steer_speed = steer_speed
+	_drive.steering_smoothing = steering_smoothing
+	_drive.min_speed_to_steer = min_speed_to_steer
+	_drive.high_speed_accel_factor = high_speed_accel_factor
+	_drive.wall_penalty_rearm_sec = wall_penalty_rearm_sec
+	_drive.crash_min_impact_speed = crash_min_impact_speed
+	_drive.crash_stun_sec = crash_stun_sec
+	_drive.crash_knockback_min = crash_knockback_min
+	_drive.crash_knockback_impact_scale = crash_knockback_impact_scale
+	_drive.crash_steer_lock_sec = crash_steer_lock_sec
 
 func setup_camera_limits(arena: Rect2) -> void:
 	_camera.limit_left = int(arena.position.x)
@@ -79,28 +93,22 @@ func setup_camera_limits(arena: Rect2) -> void:
 
 func _physics_process(delta: float) -> void:
 	if not GameState.is_running:
-		_forward_speed = 0.0
+		_drive.stop()
 		velocity = Vector2.ZERO
 		move_and_slide()
 		return
 
 	var throttle := _get_throttle()
 	var steer_input := _get_steer_input()
-	var steer_locked := Time.get_ticks_msec() < _crash_steer_lock_until_ms
-	if steer_locked:
-		steer_input = 0.0
-		_steer_smoothed = 0.0
-	else:
-		_steer_smoothed = lerpf(_steer_smoothed, steer_input, steering_smoothing * delta)
+	var speed_cap := max_speed
+	if _nitro_time_left > 0.0:
+		speed_cap = max_speed * nitro_multiplier
 
-	_update_forward_speed(throttle, delta)
-	if not steer_locked:
-		_apply_steering(delta)
+	var pre_move_velocity := _drive.physics_step(self, delta, throttle, steer_input, speed_cap)
+	var crash := _drive.move_and_handle_walls(self, pre_move_velocity, crash_loot_penalty)
+	if crash.get("crashed", false):
+		_apply_wall_crash_juice(crash.impact_speed, crash.normal)
 
-	velocity = Vector2.from_angle(rotation) * _forward_speed
-	var pre_move_velocity := velocity
-	move_and_slide()
-	_detect_wall_crash(pre_move_velocity)
 	_detect_sharp_turn(delta)
 	_prev_rotation = rotation
 
@@ -132,7 +140,7 @@ func _get_throttle() -> float:
 		Input.get_action_strength(Constants.INPUT_GAS)
 		- Input.get_action_strength(Constants.INPUT_BRAKE)
 	)
-	if throttle > 0.0 and Time.get_ticks_msec() < _crash_stun_until_ms:
+	if throttle > 0.0 and _drive.is_gas_stunned():
 		return 0.0
 	return throttle
 
@@ -142,96 +150,33 @@ func _get_steer_input() -> float:
 		- Input.get_action_strength(Constants.INPUT_STEER_LEFT)
 	)
 
-func _update_forward_speed(throttle: float, delta: float) -> void:
-	if throttle > 0.0:
-		var speed_ratio := clampf(absf(_forward_speed) / max_speed, 0.0, 1.0)
-		var accel_mult := lerpf(1.0, high_speed_accel_factor, speed_ratio)
-		_forward_speed += throttle * acceleration * accel_mult * delta
-	elif throttle < 0.0:
-		if _forward_speed > 0.0:
-			_forward_speed -= brake_force * absf(throttle) * delta
-		else:
-			_forward_speed += throttle * acceleration * 0.55 * delta
-	else:
-		var decay := drag * maxf(absf(_forward_speed), 60.0) * delta
-		_forward_speed = move_toward(_forward_speed, 0.0, decay)
-
-	var cap := max_speed
-	if _nitro_time_left > 0.0:
-		cap = max_speed * nitro_multiplier
-	_forward_speed = clampf(_forward_speed, -reverse_max_speed, cap)
-
-func _apply_steering(delta: float) -> void:
-	if absf(_forward_speed) < min_speed_to_steer:
-		return
-
-	var speed_factor := clampf(absf(_forward_speed) / max_speed, 0.25, 1.0)
-	var direction_sign := 1.0 if _forward_speed >= 0.0 else -1.0
-	rotation += _steer_smoothed * steer_speed * speed_factor * direction_sign * delta
-
 func _on_card_played(card_type: int) -> void:
 	if card_type == Card.Type.NITRO:
 		_nitro_time_left = nitro_duration
-		_forward_speed = minf(_forward_speed + nitro_impulse, max_speed * nitro_multiplier)
+		_drive.forward_speed = minf(
+			_drive.forward_speed + nitro_impulse,
+			max_speed * nitro_multiplier
+		)
 		GameState.nitro_used.emit()
 
 func get_rear_spawn_point() -> Vector2:
 	return global_position - Vector2.from_angle(rotation) * 48.0
 
-func _is_wall_collider(collider: Object) -> bool:
-	# TestTrack: StaticBody2D u grupi "walls". City: TileMapLayer u istoj grupi.
-	if collider is StaticBody2D or collider is TileMapLayer:
-		return collider.is_in_group(Constants.GROUP_WALLS)
-	return false
-
-func _detect_wall_crash(pre_move_velocity: Vector2) -> void:
-	var now_ms := Time.get_ticks_msec()
-
-	for i in get_slide_collision_count():
-		var collision := get_slide_collision(i)
-		var collider := collision.get_collider()
-		if not _is_wall_collider(collider):
-			continue
-
-		var wall_id: int = collider.get_instance_id()
-		if now_ms < int(_wall_penalty_rearm_until_ms.get(wall_id, 0)):
-			continue
-
-		var impact_speed := -pre_move_velocity.dot(collision.get_normal())
-		if impact_speed < crash_min_impact_speed:
-			continue
-
-		_wall_penalty_rearm_until_ms[wall_id] = now_ms + int(wall_penalty_rearm_sec * 1000.0)
-		GameState.crash_detected.emit(crash_loot_penalty)
-		_apply_wall_crash(collision, impact_speed)
-		return
-
-func _apply_wall_crash(collision: KinematicCollision2D, impact_speed: float) -> void:
-	var normal := collision.get_normal()
+func _apply_wall_crash_juice(impact_speed: float, normal: Vector2) -> void:
 	var intensity := clampf(impact_speed / max_speed, 0.35, 1.25)
-	var now_ms := Time.get_ticks_msec()
-
-	_crash_stun_until_ms = now_ms + int(crash_stun_sec * 1000.0)
-	_crash_steer_lock_until_ms = now_ms + int(crash_steer_lock_sec * 1000.0)
 	_shake_time_left = crash_shake_duration
 	_shake_normal = normal
 	_crash_juice_time_left = crash_shake_duration
 	_crash_juice_intensity = intensity
 	_crash_wobble = deg_to_rad(crash_wobble_max_deg) * intensity * (1.0 if randf() > 0.5 else -1.0)
-	_steer_smoothed = 0.0
-
-	var knockback := crash_knockback_min + impact_speed * crash_knockback_impact_scale
-	global_position += normal * knockback
-	_forward_speed = 0.0
-	velocity = Vector2.ZERO
 	_update_car_sprite()
 
 func _detect_sharp_turn(delta: float) -> void:
 	if _sharp_turn_cooldown_left > 0.0:
 		return
-	if absf(_forward_speed) < sharp_turn_min_speed:
+	if absf(_drive.get_forward_speed()) < sharp_turn_min_speed:
 		return
-	if absf(_steer_smoothed) < sharp_turn_steer_threshold:
+	if absf(_drive.steer_smoothed) < sharp_turn_steer_threshold:
 		return
 
 	var angular_speed_deg := absf(
@@ -251,7 +196,7 @@ func _update_car_sprite(delta: float = 0.0) -> void:
 	if _car_sprite == null:
 		return
 
-	if absf(_forward_speed) > 5.0:
+	if absf(_drive.get_forward_speed()) > 5.0:
 		_car_anim_accum += delta * car_anim_fps
 		_car_sprite.frame = int(_car_anim_accum) % car_anim_frames
 

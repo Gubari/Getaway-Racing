@@ -7,32 +7,42 @@
 [ext_resource type="PackedScene" path="res://scenes/cards/card_manager.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/levels/garage.tscn" id="7"]
-[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="8"]
+[ext_resource type="PackedScene" uid="uid://b4bi0f3d0rm3y" path="res://scenes/ui/pause_menu.tscn" id="8"]
+[ext_resource type="Script" uid="uid://dpcyx122u6xpl" path="res://scenes/cards/card.gd" id="8_th5th"]
 [ext_resource type="PackedScene" path="res://scenes/levels/nav_region.tscn" id="9"]
-[ext_resource type="Resource" path="res://resources/cards/ulje.tres" id="10"]
-[ext_resource type="Resource" path="res://resources/cards/nitro.tres" id="11"]
-[ext_resource type="Resource" path="res://resources/cards/barikada.tres" id="12"]
+[ext_resource type="Resource" uid="uid://bud036g1grhwj" path="res://resources/cards/ulje.tres" id="10"]
+[ext_resource type="Resource" uid="uid://pw0lr6j6l6o8" path="res://resources/cards/nitro.tres" id="11"]
+[ext_resource type="Resource" uid="uid://p3dmeg04qw3b" path="res://resources/cards/barikada.tres" id="12"]
 
 [node name="Main" type="Node2D" unique_id=1089452316]
 script = ExtResource("1")
 
 [node name="City" parent="." unique_id=385713939 instance=ExtResource("2_hujxm")]
+starting_loot = 1200000.0
 
-[node name="NavRegion" parent="." instance=ExtResource("9")]
+[node name="NavRegion" parent="." unique_id=1762320978 instance=ExtResource("9")]
 
 [node name="Player" parent="." unique_id=1188349856 instance=ExtResource("2")]
 position = Vector2(150, 450)
+wall_penalty_rearm_sec = 0.5
+crash_stun_sec = 0.2
 crash_loot_penalty = 10.0
+crash_steer_lock_sec = 0.2
 
 [node name="Police" parent="." unique_id=1061832071 instance=ExtResource("3")]
 position = Vector2(150, 200)
+chase_speed = 300.0
+search_speed = 250.0
+return_speed = 150.0
+lose_sight_grace = 4.0
+wall_crash_enabled = false
 
 [node name="Garage" parent="." unique_id=1636931700 instance=ExtResource("7")]
-position = Vector2(1200, 450)
+position = Vector2(1306, 803)
 
 [node name="CardManager" parent="." unique_id=1632859727 instance=ExtResource("4")]
-abilities = [ExtResource("10"), ExtResource("11"), ExtResource("12")]
+abilities = Array[ExtResource("8_th5th")]([ExtResource("10"), ExtResource("11"), ExtResource("12")])
 
 [node name="HUD" parent="." unique_id=118646500 instance=ExtResource("5")]
 
-[node name="PauseMenu" parent="." instance=ExtResource("8")]
+[node name="PauseMenu" parent="." unique_id=135400845 instance=ExtResource("8")]

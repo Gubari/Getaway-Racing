@@ -7,9 +7,9 @@ extends CharacterBody2D
 
 enum State { CHASE, SEARCHING, RETURNING }
 
-@export var chase_speed: float = 240.0
-@export var search_speed: float = 150.0
-@export var return_speed: float = 120.0
+@export var chase_speed: float = 420.0
+@export var search_speed: float = 300.0
+@export var return_speed: float = 180.0
 @export var vision_range: float = 350.0
 @export var vision_angle_deg: float = 60.0    # PUN ugao konusa
 @export var close_range: float = 160.0        # unutar ovoga te OSETI bez obzira na ugao (kola su bucna)
@@ -24,14 +24,24 @@ enum State { CHASE, SEARCHING, RETURNING }
 
 @export_group("Driving")
 @export var acceleration: float = 480.0
+@export var max_speed: float = 420.0
+@export var reverse_max_speed: float = 160.0
 @export var drag: float = 3.2
 @export var brake_force: float = 1100.0
 @export var steer_speed: float = 3.1
 @export var steering_smoothing: float = 12.0
 @export var min_speed_to_steer: float = 35.0
 @export var high_speed_accel_factor: float = 0.45
-@export var reverse_max_speed: float = 160.0
-@export var ai_steer_angle_deg: float = 45.0   # pun gas skretanja kad je meta ovako off-axis
+@export var ai_steer_angle_deg: float = 45.0
+
+@export_group("Crash")
+@export var wall_crash_enabled: bool = true
+@export var wall_penalty_rearm_sec: float = 0.75
+@export var crash_min_impact_speed: float = 70.0
+@export var crash_stun_sec: float = 0.3
+@export var crash_knockback_min: float = 16.0
+@export var crash_knockback_impact_scale: float = 0.035
+@export var crash_steer_lock_sec: float = 0.3
 
 @export_group("Sprite")
 @export var car_anim_fps: float = 14.0
@@ -59,8 +69,7 @@ var _spin_dir: float = 1.0
 var _last_dist: float = INF
 var _stuck_timer: float = 0.0
 
-var _forward_speed: float = 0.0
-var _steer_smoothed: float = 0.0
+var _drive := TopDownCarDriving.new()
 var _car_anim_accum: float = 0.0
 
 @onready var los_ray: RayCast2D = $LineOfSight
@@ -77,6 +86,24 @@ func _ready() -> void:
 	move_target = last_known_pos
 	agent.path_desired_distance = 8.0
 	agent.target_desired_distance = 16.0
+	_sync_drive_params()
+
+func _sync_drive_params() -> void:
+	_drive.acceleration = acceleration
+	_drive.max_speed = max_speed
+	_drive.reverse_max_speed = reverse_max_speed
+	_drive.drag = drag
+	_drive.brake_force = brake_force
+	_drive.steer_speed = steer_speed
+	_drive.steering_smoothing = steering_smoothing
+	_drive.min_speed_to_steer = min_speed_to_steer
+	_drive.high_speed_accel_factor = high_speed_accel_factor
+	_drive.wall_penalty_rearm_sec = wall_penalty_rearm_sec
+	_drive.crash_min_impact_speed = crash_min_impact_speed
+	_drive.crash_stun_sec = crash_stun_sec
+	_drive.crash_knockback_min = crash_knockback_min
+	_drive.crash_knockback_impact_scale = crash_knockback_impact_scale
+	_drive.crash_steer_lock_sec = crash_steer_lock_sec
 
 func _physics_process(delta: float) -> void:
 	if player == null:
@@ -86,7 +113,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if not GameState.is_running:
-		_forward_speed = 0.0
+		_drive.stop()
 		velocity = Vector2.ZERO
 		move_and_slide()
 		return
@@ -115,7 +142,7 @@ func _update_car_sprite(delta: float) -> void:
 	if _car_sprite.texture != tex:
 		_car_sprite.texture = tex
 
-	if sirens_on or absf(_forward_speed) > 5.0:
+	if sirens_on or absf(_drive.get_forward_speed()) > 5.0:
 		_car_anim_accum += delta * car_anim_fps
 		_car_sprite.frame = int(_car_anim_accum) % CAR_ANIM_FRAMES
 
@@ -234,75 +261,38 @@ func _move(delta: float, speed_cap: float) -> void:
 		_skid(delta)
 		return
 
-	if agent.is_navigation_finished():
-		_apply_drive(delta, 0.0, 0.0, speed_cap)
-		move_and_slide()
-		return
+	var throttle := 0.0
+	var steer_input := 0.0
 
-	var next_point := agent.get_next_path_position()
-	var to_next := next_point - global_position
-	if to_next.length_squared() < 16.0:
-		_apply_drive(delta, 0.0, 0.0, speed_cap)
-		move_and_slide()
-		return
+	if not agent.is_navigation_finished():
+		var next_point := agent.get_next_path_position()
+		var to_next := next_point - global_position
+		if to_next.length_squared() >= 16.0:
+			var angle_diff := wrapf(to_next.angle() - rotation, -PI, PI)
+			steer_input = clampf(
+				angle_diff / deg_to_rad(ai_steer_angle_deg),
+				-1.0,
+				1.0
+			)
+			throttle = 1.0
 
-	var desired_angle := to_next.angle()
-	var angle_diff := wrapf(desired_angle - rotation, -PI, PI)
-	var steer_input := clampf(
-		angle_diff / deg_to_rad(ai_steer_angle_deg),
-		-1.0,
-		1.0
-	)
-	var throttle := 1.0
-	if absf(angle_diff) > deg_to_rad(70.0):
-		throttle = 0.25
-	elif absf(angle_diff) > deg_to_rad(40.0):
-		throttle = 0.55
-
-	_apply_drive(delta, throttle, steer_input, speed_cap)
-	move_and_slide()
-
-func _apply_drive(delta: float, throttle: float, steer_input: float, max_speed_cap: float) -> void:
-	_steer_smoothed = lerpf(_steer_smoothed, steer_input, steering_smoothing * delta)
-	_update_forward_speed(throttle, delta, max_speed_cap)
-	_apply_steering(delta, max_speed_cap)
-	velocity = Vector2.from_angle(rotation) * _forward_speed
-
-func _update_forward_speed(throttle: float, delta: float, max_speed_cap: float) -> void:
-	if throttle > 0.0:
-		var speed_ratio := clampf(absf(_forward_speed) / max_speed_cap, 0.0, 1.0)
-		var accel_mult := lerpf(1.0, high_speed_accel_factor, speed_ratio)
-		_forward_speed += throttle * acceleration * accel_mult * delta
-	elif throttle < 0.0:
-		if _forward_speed > 0.0:
-			_forward_speed -= brake_force * absf(throttle) * delta
-		else:
-			_forward_speed += throttle * acceleration * 0.55 * delta
+	var pre_move_velocity := _drive.physics_step(self, delta, throttle, steer_input, speed_cap)
+	if wall_crash_enabled:
+		_drive.move_and_handle_walls(self, pre_move_velocity, 0.0)
 	else:
-		var decay := drag * maxf(absf(_forward_speed), 60.0) * delta
-		_forward_speed = move_toward(_forward_speed, 0.0, decay)
-
-	_forward_speed = clampf(_forward_speed, -reverse_max_speed, max_speed_cap)
-
-func _apply_steering(delta: float, max_speed_cap: float) -> void:
-	if absf(_forward_speed) < min_speed_to_steer:
-		return
-
-	var speed_factor := clampf(absf(_forward_speed) / max_speed_cap, 0.25, 1.0)
-	var direction_sign := 1.0 if _forward_speed >= 0.0 else -1.0
-	rotation += _steer_smoothed * steer_speed * speed_factor * direction_sign * delta
+		move_and_slide()
 
 ## Poziva je ULJE: policija gubi kontrolu (klizi po inerciji + vrti se) `duration` sek.
 func lose_control(duration: float) -> void:
 	if _control_lost_timer <= 0.0:
-		_spin_dir = 1.0 if randf() < 0.5 else -1.0   # nasumican smer vrtnje
-		velocity = Vector2.from_angle(rotation) * _forward_speed
+		_spin_dir = 1.0 if randf() < 0.5 else -1.0
+		velocity = Vector2.from_angle(rotation) * _drive.get_forward_speed()
 	_control_lost_timer = maxf(_control_lost_timer, duration)
 
 func _skid(delta: float) -> void:
 	rotation += _spin_dir * skid_spin * delta
 	velocity = velocity.move_toward(Vector2.ZERO, skid_friction * delta)
-	_forward_speed = velocity.dot(Vector2.from_angle(rotation))
+	_drive.forward_speed = velocity.dot(Vector2.from_angle(rotation))
 	move_and_slide()
 
 func _arrived() -> bool:
