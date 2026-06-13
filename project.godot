@@ -10,9 +10,21 @@ config_version=5
 
 [application]
 
-config/name="Racer"
+config/name="Scrap Heist"
 config/features=PackedStringArray("4.6", "Mobile")
+run/main_scene="res://scenes/main/main.tscn"
 config/icon="res://icon.svg"
+
+[autoload]
+
+GameState="*res://scripts/game_state.gd"
+
+[layer_names]
+
+2d_physics/layer_1="player"
+2d_physics/layer_2="police"
+2d_physics/layer_3="walls"
+2d_physics/layer_4="card_effects"
 
 [physics]
 
