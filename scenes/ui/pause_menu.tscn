@@ -121,8 +121,9 @@ theme_override_styles/panel = SubResource("sb_panel")
 theme_override_constants/separation = 16
 
 [node name="Title" type="Label" parent="PausePanel/Frame/VBox"]
+theme_override_colors/font_color = Color(0.337, 0.349, 0.447, 1)
 theme_override_font_sizes/font_size = 34
-text = "PAUZA"
+text = "PAUSED"
 horizontal_alignment = 1
 
 [node name="Sep" type="HSeparator" parent="PausePanel/Frame/VBox"]
@@ -154,6 +155,7 @@ theme_override_styles/panel = SubResource("sb_panel")
 theme_override_constants/separation = 18
 
 [node name="Title" type="Label" parent="SettingsPanel/Frame/VBox"]
+theme_override_colors/font_color = Color(0.337, 0.349, 0.447, 1)
 theme_override_font_sizes/font_size = 34
 text = "SETTINGS"
 horizontal_alignment = 1
@@ -171,6 +173,7 @@ stretch_mode = 5
 
 [node name="Label" type="Label" parent="SettingsPanel/Frame/VBox/SfxRow"]
 custom_minimum_size = Vector2(90, 0)
+theme_override_colors/font_color = Color(0.337, 0.349, 0.447, 1)
 theme_override_font_sizes/font_size = 22
 text = "SFX"
 vertical_alignment = 1
@@ -194,6 +197,7 @@ stretch_mode = 5
 
 [node name="Label" type="Label" parent="SettingsPanel/Frame/VBox/MusicRow"]
 custom_minimum_size = Vector2(90, 0)
+theme_override_colors/font_color = Color(0.337, 0.349, 0.447, 1)
 theme_override_font_sizes/font_size = 22
 text = "Music"
 vertical_alignment = 1
