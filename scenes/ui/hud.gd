@@ -19,7 +19,7 @@ func _ready() -> void:
 	GameState.game_won.connect(_on_game_won)
 	GameState.game_over.connect(_on_game_over)
 	GameState.garage_blocked.connect(_on_garage_blocked)
-	_on_loot_changed(GameState.loot_percent)
+	_on_loot_changed(GameState.loot_amount)
 	_on_heat_changed(GameState.heat)
 	_win_panel.visible = false
 	_game_over_panel.visible = false
@@ -33,17 +33,17 @@ func _process(delta: float) -> void:
 		_blocked_panel.visible = false
 
 func _on_loot_changed(value: float) -> void:
-	_loot_label.text = "Plen: %d%%" % roundi(value)
+	_loot_label.text = "Plen: %s" % GameState.format_loot(value)
 
 func _on_heat_changed(value: float) -> void:
 	_heat_label.text = "Heat: %d" % roundi(value)
 
 func _on_game_won() -> void:
-	_win_label.text = "Pobeda!\nPlen: %d%%" % roundi(GameState.loot_percent)
+	_win_label.text = "Pobeda!\nPlen: %s" % GameState.format_loot(GameState.loot_amount)
 	_win_panel.visible = true
 
 func _on_game_over() -> void:
-	_game_over_label.text = "Uhvacen!\nPlen: %d%%" % roundi(GameState.loot_percent)
+	_game_over_label.text = "Uhvacen!\nPlen: %s" % GameState.format_loot(GameState.loot_amount)
 	_game_over_panel.visible = true
 
 func _on_garage_blocked(message: String) -> void:

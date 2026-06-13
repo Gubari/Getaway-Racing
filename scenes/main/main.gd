@@ -10,7 +10,10 @@ extends Node2D
 func _ready() -> void:
 	_setup_spawns()
 	_setup_camera()
-	GameState.start_run()
+	var starting_loot := 100_000.0
+	if _level.has_method("get_starting_loot"):
+		starting_loot = _level.get_starting_loot()
+	GameState.start_run(starting_loot)
 
 func _setup_spawns() -> void:
 	if _level.has_method("get_player_spawn"):
