@@ -1,6 +1,6 @@
 extends CanvasLayer
-## HUD: plen %, ruka karata, gas/kocnica dugmad, touch layout.
-## Vlasnik: D. Placeholder prikaz plena/pobede dok D ne napravi finalni UI.
+## HUD: plen %, ruka karata, touch layout (TouchControls sub-scena).
+## Vlasnik: D.
 
 @onready var _loot_label: Label = $Control/LootLabel
 @onready var _heat_label: Label = $Control/HeatLabel
