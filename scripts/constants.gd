@@ -17,3 +17,10 @@ const LAYER_PLAYER := 1   # layer 1
 const LAYER_POLICE := 2   # layer 2
 const LAYER_WALLS := 4    # layer 3  <- line-of-sight raycast gleda SAMO ovo
 const LAYER_CARD_FX := 8  # layer 4
+
+# --- INPUT AKCIJE (Project Settings -> Input Map, vlasnik: A) ---
+# D povezuje TouchScreenButton.action na ove stringove.
+const INPUT_GAS := "gas"
+const INPUT_BRAKE := "brake"
+const INPUT_STEER_LEFT := "steer_left"
+const INPUT_STEER_RIGHT := "steer_right"
