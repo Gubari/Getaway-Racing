@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="Card" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="Card" format=3 uid="uid://pw0lr6j6l6o8"]
 
-[ext_resource type="Script" path="res://scenes/cards/card.gd" id="1"]
+[ext_resource type="Script" uid="uid://dpcyx122u6xpl" path="res://scenes/cards/card.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
@@ -8,4 +8,3 @@ type = 3
 display_name = "Nitro"
 description = "Burst brzine. Trese plen malo."
 cooldown = 6.0
-max_charges = -1
