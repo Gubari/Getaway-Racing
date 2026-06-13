@@ -22,6 +22,13 @@ enum State { CHASE, SEARCHING, RETURNING }
 @export var catch_distance: float = 28.0      # kad te stigne izbliza -> uhvacen
 @export var turn_speed: float = 9.0           # glatkoca rotacije (lerp)
 
+@export_group("Sprite")
+@export var car_anim_fps: float = 14.0
+
+const TEX_NORMAL := preload("res://assets/sprites/police/police_car_drive.png")
+const TEX_CHASING := preload("res://assets/sprites/police/police_car_chasing_drive.png")
+const CAR_ANIM_FRAMES := 6
+
 var state: State = State.CHASE                # nivo pocinje ODMAH u CHASE
 var player: Node2D = null
 var home_position: Vector2                    # gde se vraca u RETURNING
@@ -37,8 +44,11 @@ var lose_timer: float = 0.0                    # grace dok jos "pamti" igraca u 
 var _last_dist: float = INF
 var _stuck_timer: float = 0.0
 
+var _car_anim_accum: float = 0.0
+
 @onready var los_ray: RayCast2D = $LineOfSight
 @onready var agent: NavigationAgent2D = $NavigationAgent2D
+@onready var _car_sprite: Sprite2D = $CarSprite
 
 func _ready() -> void:
 	add_to_group(Constants.GROUP_POLICE)
@@ -60,7 +70,24 @@ func _physics_process(delta: float) -> void:
 		State.SEARCHING: _do_searching(delta, can_see)
 		State.RETURNING: _do_returning(delta, can_see)
 
+	_update_car_sprite(delta)
 	queue_redraw()   # da se vision cone iscrta
+
+## Sprite je dete tela pa se rotira sa fizikom (nos = +X). U CHASE i SEARCHING
+## state-u koristi chasing teksturu (upaljene sirene) i animira stalno; u
+## RETURNING koristi normalnu teksturu koja se animira samo dok se krece.
+func _update_car_sprite(delta: float) -> void:
+	if _car_sprite == null:
+		return
+
+	var sirens_on := state == State.CHASE or state == State.SEARCHING
+	var tex := TEX_CHASING if sirens_on else TEX_NORMAL
+	if _car_sprite.texture != tex:
+		_car_sprite.texture = tex
+
+	if sirens_on or velocity.length() > 5.0:
+		_car_anim_accum += delta * car_anim_fps
+		_car_sprite.frame = int(_car_anim_accum) % CAR_ANIM_FRAMES
 
 # --- VISION: ugao + domet + line-of-sight ---
 func _can_see_player() -> bool:
@@ -204,10 +231,6 @@ func _patrol_point() -> Vector2:
 
 # --- VIZUELNI KONUS (ziri mora da vidi "kad me vide") ---
 func _draw() -> void:
-	draw_colored_polygon(
-		PackedVector2Array([Vector2(-16, -24), Vector2(16, -24), Vector2(16, 24), Vector2(-16, 24)]),
-		Color(0.9, 0.25, 0.2)
-	)
 	var col := Color.RED
 	if state == State.SEARCHING: col = Color.YELLOW
 	elif state == State.RETURNING: col = Color.GRAY

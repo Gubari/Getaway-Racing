@@ -32,6 +32,10 @@ extends CharacterBody2D
 @export var crash_wobble_max_deg: float = 10.0
 @export var crash_squash_amount: float = 0.18
 
+@export_group("Sprite")
+@export var car_anim_fps: float = 14.0
+@export var car_anim_frames: int = 6
+
 @export_group("Sharp Turn")
 @export var sharp_turn_loot_penalty: float = 1.5
 @export var sharp_turn_cooldown: float = 0.35
@@ -53,8 +57,10 @@ var _crash_juice_time_left: float = 0.0
 var _crash_juice_intensity: float = 0.0
 var _crash_wobble: float = 0.0
 var _camera_base_zoom: Vector2 = Vector2.ONE
+var _car_anim_accum: float = 0.0
 
 @onready var _camera: Camera2D = $Camera2D
+@onready var _car_sprite: Sprite2D = $CarSprite
 
 func _ready() -> void:
 	add_to_group(Constants.GROUP_PLAYER)
@@ -62,7 +68,7 @@ func _ready() -> void:
 	_prev_rotation = rotation
 	_camera_base_zoom = _camera.zoom
 	_camera.make_current()
-	queue_redraw()
+	_update_car_sprite()
 
 func setup_camera_limits(arena: Rect2) -> void:
 	_camera.limit_left = int(arena.position.x)
@@ -105,7 +111,7 @@ func _process(delta: float) -> void:
 		_sharp_turn_cooldown_left = maxf(0.0, _sharp_turn_cooldown_left - delta)
 	if _crash_juice_time_left > 0.0:
 		_crash_juice_time_left = maxf(0.0, _crash_juice_time_left - delta)
-		queue_redraw()
+	_update_car_sprite(delta)
 	_update_camera_shake(delta)
 
 func _update_camera_shake(delta: float) -> void:
@@ -214,7 +220,7 @@ func _apply_wall_crash(collision: KinematicCollision2D, impact_speed: float) -> 
 	global_position += normal * knockback
 	_forward_speed = 0.0
 	velocity = Vector2.ZERO
-	queue_redraw()
+	_update_car_sprite()
 
 func _detect_sharp_turn(delta: float) -> void:
 	if _sharp_turn_cooldown_left > 0.0:
@@ -233,36 +239,24 @@ func _detect_sharp_turn(delta: float) -> void:
 	GameState.sharp_turn.emit(sharp_turn_loot_penalty)
 	_sharp_turn_cooldown_left = sharp_turn_cooldown
 
-func _draw() -> void:
-	var squash := 1.0
-	var stretch := 1.0
+## Top-down sprite (nos = +X). Sprite je dete tela pa se rotira zajedno sa
+## fizikom. Frejmovi (6) se vrte kao vozi-animacija dok se auto krece, a
+## ovde dodajemo i crash "juice": blagi wobble + crveni flash.
+## Gameplay (knockback, shake) ostaje u fizici, netaknut.
+func _update_car_sprite(delta: float = 0.0) -> void:
+	if _car_sprite == null:
+		return
+
+	if absf(_forward_speed) > 5.0:
+		_car_anim_accum += delta * car_anim_fps
+		_car_sprite.frame = int(_car_anim_accum) % car_anim_frames
+
 	var wobble_angle := 0.0
+	var flash := 0.0
 	if _crash_juice_time_left > 0.0 and crash_shake_duration > 0.0:
 		var t := _crash_juice_time_left / crash_shake_duration
-		squash = 1.0 + crash_squash_amount * t
-		stretch = 1.0 - crash_squash_amount * 0.75 * t
 		wobble_angle = _crash_wobble * t
+		flash = clampf(_crash_juice_intensity, 0.0, 1.0) * t
 
-	# Lokalni prostor: nos auta je uvek +X (rotation cvora vec okrece sprite).
-	var forward := Vector2.RIGHT.rotated(wobble_angle)
-	var right := forward.orthogonal()
-
-	var body := PackedVector2Array([
-		-right * 16.0 * squash + forward * -24.0 * stretch,
-		right * 16.0 * squash + forward * -24.0 * stretch,
-		right * 16.0 * squash + forward * 24.0 * stretch,
-		-right * 16.0 * squash + forward * 24.0 * stretch,
-	])
-	var nose := PackedVector2Array([
-		right * 16.0 * squash + forward * 24.0 * stretch,
-		right * 8.0 * squash + forward * 32.0 * stretch,
-		-right * 8.0 * squash + forward * 32.0 * stretch,
-	])
-
-	var body_color := Color(0.25, 0.65, 1.0)
-	if _crash_juice_time_left > 0.0:
-		var flash := clampf(_crash_juice_intensity, 0.0, 1.0)
-		body_color = body_color.lerp(Color(1.0, 0.35, 0.25), flash * 0.65)
-
-	draw_colored_polygon(body, body_color)
-	draw_colored_polygon(nose, body_color.darkened(0.15))
+	_car_sprite.rotation = wobble_angle
+	_car_sprite.modulate = Color.WHITE.lerp(Color(1.0, 0.45, 0.4), flash * 0.7)
