@@ -2,9 +2,8 @@ extends CharacterBody2D
 ## POLICIJSKI AI: state masina (CHASE / SEARCHING / RETURNING) + vision cone.
 ## Vlasnik: B. NAJRIZICNIJI sistem - zacementirati prvi (faza 3-5h).
 ##
-## KRETANJE: NavigationAgent2D prati navmesh -> obilazi zidove i coskove.
-## ZAHTEV: scena mora imati NavigationRegion2D sa pecenom navigacijom
-## (u pravom gradu to prave A/C; u test sceni se pece u runtime-u).
+## KRETANJE: NavigationAgent2D bira put, ista top-down fizika kao player
+## (ubrzavanje, drag, skretanje zavisi od brzine). Ulje i dalje pali _skid().
 
 enum State { CHASE, SEARCHING, RETURNING }
 
@@ -20,9 +19,19 @@ enum State { CHASE, SEARCHING, RETURNING }
 @export var peek_distance: float = 200.0      # bazni domet "juri kuda je pobegao" (obilazi zid)
 @export var patrol_radius: float = 140.0      # radijus laganog krstarenja u RETURNING
 @export var catch_distance: float = 28.0      # kad te stigne izbliza -> uhvacen
-@export var turn_speed: float = 9.0           # glatkoca rotacije (lerp)
 @export var skid_spin: float = 7.0            # brzina vrtnje dok je bez kontrole (ulje)
 @export var skid_friction: float = 160.0      # koliko brzo klizanje usporava
+
+@export_group("Driving")
+@export var acceleration: float = 480.0
+@export var drag: float = 3.2
+@export var brake_force: float = 1100.0
+@export var steer_speed: float = 3.1
+@export var steering_smoothing: float = 12.0
+@export var min_speed_to_steer: float = 35.0
+@export var high_speed_accel_factor: float = 0.45
+@export var reverse_max_speed: float = 160.0
+@export var ai_steer_angle_deg: float = 45.0   # pun gas skretanja kad je meta ovako off-axis
 
 @export_group("Sprite")
 @export var car_anim_fps: float = 14.0
@@ -50,6 +59,8 @@ var _spin_dir: float = 1.0
 var _last_dist: float = INF
 var _stuck_timer: float = 0.0
 
+var _forward_speed: float = 0.0
+var _steer_smoothed: float = 0.0
 var _car_anim_accum: float = 0.0
 
 @onready var los_ray: RayCast2D = $LineOfSight
@@ -72,6 +83,12 @@ func _physics_process(delta: float) -> void:
 		player = get_tree().get_first_node_in_group(Constants.GROUP_PLAYER)
 		if player != null:
 			last_known_pos = player.global_position
+		return
+
+	if not GameState.is_running:
+		_forward_speed = 0.0
+		velocity = Vector2.ZERO
+		move_and_slide()
 		return
 
 	if _control_lost_timer > 0.0:
@@ -98,7 +115,7 @@ func _update_car_sprite(delta: float) -> void:
 	if _car_sprite.texture != tex:
 		_car_sprite.texture = tex
 
-	if sirens_on or velocity.length() > 5.0:
+	if sirens_on or absf(_forward_speed) > 5.0:
 		_car_anim_accum += delta * car_anim_fps
 		_car_sprite.frame = int(_car_anim_accum) % CAR_ANIM_FRAMES
 
@@ -212,30 +229,80 @@ func _set_target(t: Vector2) -> void:
 	_last_dist = INF
 	_stuck_timer = 0.0
 
-func _move(delta: float, speed: float) -> void:
+func _move(delta: float, speed_cap: float) -> void:
 	if _control_lost_timer > 0.0:
-		_skid(delta)   # na ulju: ne slusa navmesh, klizi i vrti se
+		_skid(delta)
 		return
+
 	if agent.is_navigation_finished():
-		velocity = Vector2.ZERO
+		_apply_drive(delta, 0.0, 0.0, speed_cap)
 		move_and_slide()
 		return
-	# Prati sledecu tacku putanje koju navmesh racuna (obilazi zidove/coskove).
+
 	var next_point := agent.get_next_path_position()
-	var desired := (next_point - global_position).normalized()
-	rotation = lerp_angle(rotation, desired.angle(), turn_speed * delta)
-	velocity = Vector2.RIGHT.rotated(rotation) * speed   # vozi NAPRED po nosu (car-feel)
+	var to_next := next_point - global_position
+	if to_next.length_squared() < 16.0:
+		_apply_drive(delta, 0.0, 0.0, speed_cap)
+		move_and_slide()
+		return
+
+	var desired_angle := to_next.angle()
+	var angle_diff := wrapf(desired_angle - rotation, -PI, PI)
+	var steer_input := clampf(
+		angle_diff / deg_to_rad(ai_steer_angle_deg),
+		-1.0,
+		1.0
+	)
+	var throttle := 1.0
+	if absf(angle_diff) > deg_to_rad(70.0):
+		throttle = 0.25
+	elif absf(angle_diff) > deg_to_rad(40.0):
+		throttle = 0.55
+
+	_apply_drive(delta, throttle, steer_input, speed_cap)
 	move_and_slide()
+
+func _apply_drive(delta: float, throttle: float, steer_input: float, max_speed_cap: float) -> void:
+	_steer_smoothed = lerpf(_steer_smoothed, steer_input, steering_smoothing * delta)
+	_update_forward_speed(throttle, delta, max_speed_cap)
+	_apply_steering(delta, max_speed_cap)
+	velocity = Vector2.from_angle(rotation) * _forward_speed
+
+func _update_forward_speed(throttle: float, delta: float, max_speed_cap: float) -> void:
+	if throttle > 0.0:
+		var speed_ratio := clampf(absf(_forward_speed) / max_speed_cap, 0.0, 1.0)
+		var accel_mult := lerpf(1.0, high_speed_accel_factor, speed_ratio)
+		_forward_speed += throttle * acceleration * accel_mult * delta
+	elif throttle < 0.0:
+		if _forward_speed > 0.0:
+			_forward_speed -= brake_force * absf(throttle) * delta
+		else:
+			_forward_speed += throttle * acceleration * 0.55 * delta
+	else:
+		var decay := drag * maxf(absf(_forward_speed), 60.0) * delta
+		_forward_speed = move_toward(_forward_speed, 0.0, decay)
+
+	_forward_speed = clampf(_forward_speed, -reverse_max_speed, max_speed_cap)
+
+func _apply_steering(delta: float, max_speed_cap: float) -> void:
+	if absf(_forward_speed) < min_speed_to_steer:
+		return
+
+	var speed_factor := clampf(absf(_forward_speed) / max_speed_cap, 0.25, 1.0)
+	var direction_sign := 1.0 if _forward_speed >= 0.0 else -1.0
+	rotation += _steer_smoothed * steer_speed * speed_factor * direction_sign * delta
 
 ## Poziva je ULJE: policija gubi kontrolu (klizi po inerciji + vrti se) `duration` sek.
 func lose_control(duration: float) -> void:
 	if _control_lost_timer <= 0.0:
 		_spin_dir = 1.0 if randf() < 0.5 else -1.0   # nasumican smer vrtnje
+		velocity = Vector2.from_angle(rotation) * _forward_speed
 	_control_lost_timer = maxf(_control_lost_timer, duration)
 
 func _skid(delta: float) -> void:
 	rotation += _spin_dir * skid_spin * delta
 	velocity = velocity.move_toward(Vector2.ZERO, skid_friction * delta)
+	_forward_speed = velocity.dot(Vector2.from_angle(rotation))
 	move_and_slide()
 
 func _arrived() -> bool:
