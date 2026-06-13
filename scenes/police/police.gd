@@ -204,6 +204,10 @@ func _patrol_point() -> Vector2:
 
 # --- VIZUELNI KONUS (ziri mora da vidi "kad me vide") ---
 func _draw() -> void:
+	draw_colored_polygon(
+		PackedVector2Array([Vector2(-16, -24), Vector2(16, -24), Vector2(16, 24), Vector2(-16, 24)]),
+		Color(0.9, 0.25, 0.2)
+	)
 	var col := Color.RED
 	if state == State.SEARCHING: col = Color.YELLOW
 	elif state == State.RETURNING: col = Color.GRAY

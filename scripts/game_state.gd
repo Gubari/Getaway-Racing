@@ -16,8 +16,8 @@ var is_running: bool = false      # da li trka trenutno traje
 # ------------------------------------------------------------------
 # SIGNALI: dogadjaji vozila        (EMITUJE: A)
 # ------------------------------------------------------------------
-signal crash_detected             # sudar sa zidom/barikadom -> velika kazna
-signal sharp_turn                 # ostar zaokret -> mala kazna
+signal crash_detected(penalty: float)   # A salje koliko % plena gubi na udar
+signal sharp_turn(penalty: float)         # A salje koliko % plena gubi na zaokret
 signal nitro_used                 # nitro aktiviran -> trese plen (malo)
 
 # ------------------------------------------------------------------
@@ -43,8 +43,8 @@ const LOOT_PENALTY_NITRO := 3.0
 
 func _ready() -> void:
 	# GameState sam slusa dogadjaje vozila i skida plen (jedno mesto).
-	crash_detected.connect(func(): lose_loot(LOOT_PENALTY_CRASH))
-	sharp_turn.connect(func(): lose_loot(LOOT_PENALTY_SHARP_TURN))
+	crash_detected.connect(func(penalty: float): lose_loot(penalty))
+	sharp_turn.connect(func(penalty: float): lose_loot(penalty))
 	nitro_used.connect(func(): lose_loot(LOOT_PENALTY_NITRO))
 
 func start_run() -> void:
