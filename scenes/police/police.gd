@@ -20,6 +20,7 @@ func _ready() -> void:
 	add_to_group(Constants.GROUP_POLICE)
 	player = get_tree().get_first_node_in_group(Constants.GROUP_PLAYER)
 	los_ray.collision_mask = Constants.LAYER_WALLS   # raycast vidi SAMO zidove
+	queue_redraw()
 
 func _physics_process(delta: float) -> void:
 	if player == null:
@@ -84,6 +85,10 @@ func _random_nearby_point() -> Vector2:
 
 # --- VIZUELNI KONUS (ziri mora da vidi "kad me vide") ---
 func _draw() -> void:
+	draw_colored_polygon(
+		PackedVector2Array([Vector2(-16, -24), Vector2(16, -24), Vector2(16, 24), Vector2(-16, 24)]),
+		Color(0.9, 0.25, 0.2)
+	)
 	var col := Color.RED
 	if state == State.SEARCHING: col = Color.YELLOW
 	elif state == State.RETURNING: col = Color.GRAY
