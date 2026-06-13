@@ -1,8 +1,10 @@
 [gd_scene format=4 uid="uid://b4mmn4fl4ydaf"]
 
+[ext_resource type="Script" uid="uid://b8kcitywallgrp1" path="res://scenes/levels/city.gd" id="1_city"]
 [ext_resource type="TileSet" path="res://scenes/levels/city_tileset.tres" id="1_tileset"]
 
 [node name="City" type="Node2D" unique_id=385713939]
+script = ExtResource("1_city")
 
 [node name="Road" type="TileMapLayer" parent="." unique_id=1903100847]
 texture_filter = 1
