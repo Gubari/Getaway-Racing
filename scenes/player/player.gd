@@ -178,15 +178,19 @@ func _on_card_played(card_type: int) -> void:
 func get_rear_spawn_point() -> Vector2:
 	return global_position - Vector2.from_angle(rotation) * 48.0
 
+func _is_wall_collider(collider: Object) -> bool:
+	# TestTrack: StaticBody2D u grupi "walls". City: TileMapLayer u istoj grupi.
+	if collider is StaticBody2D or collider is TileMapLayer:
+		return collider.is_in_group(Constants.GROUP_WALLS)
+	return false
+
 func _detect_wall_crash(pre_move_velocity: Vector2) -> void:
 	var now_ms := Time.get_ticks_msec()
 
 	for i in get_slide_collision_count():
 		var collision := get_slide_collision(i)
 		var collider := collision.get_collider()
-		if not collider is StaticBody2D:
-			continue
-		if not collider.is_in_group(Constants.GROUP_WALLS):
+		if not _is_wall_collider(collider):
 			continue
 
 		var wall_id: int = collider.get_instance_id()
