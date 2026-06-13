@@ -72,13 +72,17 @@ func _ready() -> void:
 	player = get_tree().get_first_node_in_group(Constants.GROUP_PLAYER)
 	los_ray.collision_mask = Constants.LAYER_WALLS   # raycast vidi SAMO zidove
 	home_position = global_position
-	move_target = global_position
+	# Na startu krece ka igracu (alarm zna gde si), NE ka (0,0) = cosak mape.
+	last_known_pos = player.global_position if player != null else global_position
+	move_target = last_known_pos
 	agent.path_desired_distance = 8.0
 	agent.target_desired_distance = 16.0
 
 func _physics_process(delta: float) -> void:
 	if player == null:
 		player = get_tree().get_first_node_in_group(Constants.GROUP_PLAYER)
+		if player != null:
+			last_known_pos = player.global_position
 		return
 
 	if not GameState.is_running:
