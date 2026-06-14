@@ -904,7 +904,7 @@ position = Vector2(3596, 1987)
 position = Vector2(1393, 274)
 
 [node name="GarageSpawn" type="Marker2D" parent="HeistProfiles/downtown" unique_id=1847293654]
-position = Vector2(239, 439)
+position = Vector2(239, 469)
 
 [node name="port" type="Node2D" parent="HeistProfiles" unique_id=1847293660]
 script = ExtResource("9_heist")
@@ -925,7 +925,7 @@ position = Vector2(1956.0002, 1130)
 rotation = 3.1303415
 
 [node name="GarageSpawn" type="Marker2D" parent="HeistProfiles/port" unique_id=1847293663]
-position = Vector2(239, 444)
+position = Vector2(239, 469)
 
 [node name="industrial" type="Node2D" parent="HeistProfiles" unique_id=1847293670]
 script = ExtResource("9_heist")
@@ -947,7 +947,7 @@ position = Vector2(4163, 1915)
 rotation = -1.5244312
 
 [node name="GarageSpawn" type="Marker2D" parent="HeistProfiles/industrial" unique_id=1847293673]
-position = Vector2(3400, 650)
+position = Vector2(239, 463)
 
 [node name="Spawns" type="Node2D" parent="." unique_id=925044423]
 
