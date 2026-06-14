@@ -61,6 +61,7 @@ func _on_arrested_continue() -> void:
 	_go_to_main_menu()
 
 func _go_to_main_menu() -> void:
+	GameState.release_driving_input()
 	Audio.play_ui_click()
 	Audio.stop_heist_audio()
 	Audio.play_main_menu_music()
