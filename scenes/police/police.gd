@@ -17,7 +17,7 @@ enum State { CHASE, SEARCHING, RETURNING }
 @export var search_time: float = 6.0          # ukupno vreme pretrage pre RETURNING
 @export var look_time: float = 0.8            # pauza da "osmotri" na svakoj tacki
 @export var peek_distance: float = 200.0      # bazni domet "juri kuda je pobegao" (obilazi zid)
-@export var patrol_radius: float = 220.0      # radijus krstarenja u RETURNING (vece = duze deonice)
+@export var patrol_radius: float = 600.0      # domet roam tacaka (vece = duze vozi niz ulice pre nove tacke)
 @export var catch_distance: float = 28.0      # kad te stigne izbliza -> uhvacen
 @export var skid_spin: float = 7.0            # brzina vrtnje dok je bez kontrole (ulje)
 @export var skid_friction: float = 160.0      # koliko brzo klizanje usporava
@@ -437,42 +437,24 @@ func _is_stuck(delta: float) -> bool:
 	return _stuck_timer > 0.6 or _heading_accum > deg_to_rad(300.0)
 
 func _random_search_point() -> Vector2:
-	return _roam_point(last_known_pos, 160.0)
+	return _roam_point(last_known_pos, 360.0)
 
 func _patrol_point() -> Vector2:
 	return _roam_point(last_known_pos, patrol_radius)
 
-## Roam tacka: "opipa" zidove zracima i bira NAJOTVORENIJI pravac napred (kao kola
-## koja prate ulicu) -> nema ostrih zaokreta u zid. Ako je odlutao predaleko od
-## zone -> bazni smer je nazad ka njoj. Snap na navmesh.
+## Roam tacka: nasumicna DALEKA tacka NA navmesh-u (putu) oko zone. Navmesh putanja
+## sama vodi policiju niz ulice i kroz raskrsnice -> ne kruzi u istoj sirokoj ulici.
 func _roam_point(center: Vector2, radius: float) -> Vector2:
-	var base := rotation                             # podrazumevano: napred
-	var to_center := center - global_position
-	if to_center.length() > radius * 1.3:
-		base = to_center.angle()                     # odlutao -> nazad ka zoni
-
-	var space := get_world_2d().direct_space_state
-	var best_dir := base
-	var best_clear := -1.0
-	for offset in [0.0, -0.45, 0.45, -0.9, 0.9]:     # napred + blagi otkloni
-		var clear := _clear_distance(space, base + offset, radius)
-		if clear > best_clear:
-			best_clear = clear
-			best_dir = base + offset
-
-	var dist := clampf(best_clear - 40.0, 60.0, radius)   # idi tamo, ali stani pre zida
-	var p := global_position + Vector2.from_angle(best_dir) * dist
-	return NavigationServer2D.map_get_closest_point(agent.get_navigation_map(), p)
-
-## Cist domet do zida u datom smeru (za biranje otvorenog pravca u roamu).
-func _clear_distance(space: PhysicsDirectSpaceState2D, dir: float, max_dist: float) -> float:
-	var to := global_position + Vector2.from_angle(dir) * max_dist
-	var q := PhysicsRayQueryParameters2D.create(global_position, to, Constants.LAYER_WALLS)
-	q.exclude = [self]
-	var hit := space.intersect_ray(q)
-	if hit.is_empty():
-		return max_dist
-	return global_position.distance_to(hit.position)
+	var map := agent.get_navigation_map()
+	var best := center
+	for _attempt in 8:
+		var ang := randf() * TAU
+		var dist := randf_range(radius * 0.5, radius)
+		var p := NavigationServer2D.map_get_closest_point(map, center + Vector2.from_angle(ang) * dist)
+		best = p
+		if global_position.distance_to(p) >= radius * 0.5:   # dovoljno daleko da VOZI niz put, ne kruzi
+			return p
+	return best
 
 func is_returning() -> bool:
 	return state == State.RETURNING

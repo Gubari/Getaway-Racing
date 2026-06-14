@@ -29,7 +29,12 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 
 	if not _any_police_pursuing():
-		GameState.reach_base()   # pobeda SAMO kad nijedan policajac ne juri (svi odustali)
+		# Pobeda SAMO kad nijedan ne juri. Ako postoji cinematic -> pokreni ga (on zove reach_base).
+		var cine := get_tree().get_first_node_in_group("win_cinematic")
+		if cine != null and cine.has_method("play_win"):
+			cine.play_win()
+		else:
+			GameState.reach_base()
 		return
 
 	if _blocked_message_left <= 0.0:
