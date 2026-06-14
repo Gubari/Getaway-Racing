@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bvc6xadyhgdyk"
-path="res://.godot/imported/3_City_Props_16x16.png-74ae59a3bea9758cb3423b335647d93b.ctex"
+uid="uid://b1pvkfajrkiyu"
+path="res://.godot/imported/15_Police_Station_32x32.png-e6f880766b8e7be074c11414c881944b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/tiles/3_City_Props_16x16.png"
-dest_files=["res://.godot/imported/3_City_Props_16x16.png-74ae59a3bea9758cb3423b335647d93b.ctex"]
+source_file="res://assets/sprites/tiles/15_Police_Station_32x32.png"
+dest_files=["res://.godot/imported/15_Police_Station_32x32.png-e6f880766b8e7be074c11414c881944b.ctex"]
 
 [params]
 

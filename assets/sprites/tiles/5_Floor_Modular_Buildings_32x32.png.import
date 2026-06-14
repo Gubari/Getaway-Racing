@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://4ulluyksajg"
-path="res://.godot/imported/4_Generic_Buildings_16x16.png-c9f49e550be6a0c3dbd7e349c1d98242.ctex"
+uid="uid://bpa15fk0oa0ci"
+path="res://.godot/imported/5_Floor_Modular_Buildings_32x32.png-c633bca6f7e146fa369e8fffce019b4c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/tiles/4_Generic_Buildings_16x16.png"
-dest_files=["res://.godot/imported/4_Generic_Buildings_16x16.png-c9f49e550be6a0c3dbd7e349c1d98242.ctex"]
+source_file="res://assets/sprites/tiles/5_Floor_Modular_Buildings_32x32.png"
+dest_files=["res://.godot/imported/5_Floor_Modular_Buildings_32x32.png-c633bca6f7e146fa369e8fffce019b4c.ctex"]
 
 [params]
 
