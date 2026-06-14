@@ -30,12 +30,14 @@ signal nitro_used                 # nitro aktiviran -> trese plen (malo)
 # ------------------------------------------------------------------
 # SIGNALI: karte                   (EMITUJE: B / CardManager)
 # ------------------------------------------------------------------
-signal card_played(card_type: int)   # A slusa (npr. nitro = burst brzine)
+@warning_ignore("unused_signal")
+signal card_played(card_type: int)   # A slusa (npr. nitro = burst brzine); emituje CardManager
 
 # ------------------------------------------------------------------
 # SIGNALI: garaža / level          (EMITUJE: Garage -> A)
 # ------------------------------------------------------------------
-signal garage_blocked(message: String)   # D slusa za HUD poruku
+@warning_ignore("unused_signal")
+signal garage_blocked(message: String)   # D slusa za HUD poruku; emituje Garage
 
 # ------------------------------------------------------------------
 # SIGNALI: stanje igre / statovi   (EMITUJE: GameState)
@@ -111,7 +113,7 @@ func lose_loot(amount: float) -> void:
 	loot_amount = maxf(0.0, loot_amount - amount)
 	loot_changed.emit(loot_amount)
 
-static func format_loot(amount: float) -> String:
+func format_loot(amount: float) -> String:
 	var rounded := roundi(amount)
 	if rounded >= 1_000_000:
 		var millions := float(rounded) / 1_000_000.0

@@ -208,7 +208,7 @@ func _draw_pedal(image: Image, pressed: bool) -> void:
 		_fill_round_rect(
 			image,
 			Rect2i(inner.position.x + int(inner.size.x * 0.16), ry, int(inner.size.x * 0.68), rib_h),
-			rib_h / 2,
+			int(rib_h / 2.0),
 			PEDAL_GRIP
 		)
 
@@ -239,10 +239,10 @@ func _fill_round_rect(image: Image, rect: Rect2i, corner: int, color: Color) -> 
 	var y0 := rect.position.y
 	var x1 := rect.end.x
 	var y1 := rect.end.y
-	var r := clampi(corner, 0, int(mini(rect.size.x, rect.size.y) / 2))
+	var r := clampi(corner, 0, int(mini(rect.size.x, rect.size.y) / 2.0))
 
 	var tl := Vector2(x0 + r, y0 + r)
-	var tr := Vector2(x1 - r, y0 + r)
+	var c_tr := Vector2(x1 - r, y0 + r)
 	var bl := Vector2(x0 + r, y1 - r)
 	var br := Vector2(x1 - r, y1 - r)
 
@@ -258,7 +258,7 @@ func _fill_round_rect(image: Image, rect: Rect2i, corner: int, color: Color) -> 
 			if x < x0 + r and y < y0 + r:
 				inside = p.distance_to(tl) <= r
 			elif x >= x1 - r and y < y0 + r:
-				inside = p.distance_to(tr) <= r
+				inside = p.distance_to(c_tr) <= r
 			elif x < x0 + r and y >= y1 - r:
 				inside = p.distance_to(bl) <= r
 			elif x >= x1 - r and y >= y1 - r:

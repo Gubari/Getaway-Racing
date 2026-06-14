@@ -26,6 +26,11 @@ enum State { CHASE, SEARCHING, RETURNING }
 @export var corner_min_speed: float = 0.35    # min mnozilac brzine u najostrijem zaokretu (koci za zaokret)
 @export var approach_distance: float = 120.0  # u roamu: u ovom dometu od mete pocinje da usporava (da stane, ne kruzi)
 
+@export_group("Formacija (vise auta)")
+@export var lane_spacing: float = 55.0        # bocni razmak po slotu (trake)
+@export var row_spacing: float = 50.0         # pomeraj u dubinu (flankeri idu pozadi -> klin/V)
+@export var formation_range: float = 250.0    # blize od ovoga -> konvergiraju ka igracu (za hvatanje)
+
 @export_group("Driving")
 @export var acceleration: float = 480.0
 @export var max_speed: float = 420.0
@@ -86,6 +91,7 @@ func _ready() -> void:
 	add_to_group(Constants.GROUP_POLICE)
 	player = get_tree().get_first_node_in_group(Constants.GROUP_PLAYER)
 	los_ray.collision_mask = Constants.LAYER_WALLS   # raycast vidi SAMO zidove
+	collision_mask = Constants.LAYER_WALLS | Constants.LAYER_POLICE   # sudara se sa zidovima I drugim policajcima (ne preklapaju se)
 	home_position = global_position
 	# Na startu krece ka igracu (alarm zna gde si), NE ka (0,0) = cosak mape.
 	last_known_pos = player.global_position if player != null else global_position
@@ -175,7 +181,7 @@ func _do_chase(delta: float, can_see: bool) -> void:
 		if d.length() > 4.0:
 			last_seen_dir = d.normalized()   # zapamti kuda igrac ide
 		last_known_pos = player.global_position
-		move_target = player.global_position
+		move_target = _formation_target(player.global_position)
 		agent.target_position = move_target
 		_move(delta, chase_speed)
 		if GameState.is_running and global_position.distance_to(player.global_position) <= catch_distance:
@@ -189,11 +195,29 @@ func _do_chase(delta: float, can_see: bool) -> void:
 			if d.length() > 4.0:
 				last_seen_dir = d.normalized()
 			last_known_pos = player.global_position   # prati stvarnu poziciju dok traje vruca potera
-			move_target = last_known_pos
+			move_target = _formation_target(last_known_pos)
 			agent.target_position = move_target
 			_move(delta, chase_speed)
 		else:
 			_enter_searching()
+
+## Pomeri metu u FORMACIJU po slotu (indeks medju policajcima): bocno + u dubinu
+## (klin/V -> flankeri idu pozadi). Blizu igraca pomeraj nestaje pa konvergiraju.
+func _formation_target(base: Vector2) -> Vector2:
+	var cops := get_tree().get_nodes_in_group(Constants.GROUP_POLICE)
+	var total := cops.size()
+	if total <= 1:
+		return base
+	var to_base := base - global_position
+	var dist := to_base.length()
+	if dist < 1.0:
+		return base
+	var dir := to_base / dist
+	var perp := Vector2(-dir.y, dir.x)
+	var rank := float(cops.find(self)) - float(total - 1) * 0.5
+	var factor := clampf(dist / formation_range, 0.0, 1.0)   # blizu -> konvergira (hvatanje)
+	var offset := perp * (rank * lane_spacing) - dir * (absf(rank) * row_spacing)
+	return base + offset * factor
 
 func _enter_searching() -> void:
 	state = State.SEARCHING
