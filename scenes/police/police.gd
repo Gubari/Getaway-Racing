@@ -183,7 +183,6 @@ func _physics_process(delta: float) -> void:
 	_update_siren(state == State.CHASE or state == State.SEARCHING)
 	_update_depth_sort()
 	_update_car_sprite(delta)
-	queue_redraw()   # da se vision cone iscrta
 
 ## Sprite je dete tela pa se rotira sa fizikom (nos = +X). U CHASE i SEARCHING
 ## state-u koristi chasing teksturu (upaljene sirene) i animira stalno; u
@@ -470,18 +469,3 @@ func is_actively_pursuing() -> bool:
 
 func _update_depth_sort() -> void:
 	z_index = int(global_position.y + depth_sort_y_offset)
-
-# --- VIZUELNI KONUS (ziri mora da vidi "kad me vide") ---
-func _draw() -> void:
-	var col := Color.RED
-	if state == State.SEARCHING: col = Color.YELLOW
-	elif state == State.RETURNING: col = Color.GRAY
-	col.a = 0.22
-	var pts := PackedVector2Array([Vector2.ZERO])
-	var half := deg_to_rad(vision_angle_deg * 0.5)
-	for i in range(13):
-		var a := lerpf(-half, half, i / 12.0)
-		pts.append(Vector2.RIGHT.rotated(a) * vision_range)
-	draw_colored_polygon(pts, col)
-	# krug "osecaja iz blizine" (close_range) - radi orijentacije pri stelovanju
-	draw_arc(Vector2.ZERO, close_range, 0.0, TAU, 32, Color(1, 1, 1, 0.25), 2.0)

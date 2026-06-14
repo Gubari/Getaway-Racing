@@ -225,6 +225,13 @@ theme_override_font_sizes/font_size = 34
 text = "PLAN THE HEIST"
 horizontal_alignment = 1
 
+[node name="DragHint" type="Label" parent="HeistMapPanel/Frame/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.52, 0.6, 1)
+theme_override_font_sizes/font_size = 15
+text = "Drag to move  ·  Scroll / pinch to zoom"
+horizontal_alignment = 1
+
 [node name="Sep" type="HSeparator" parent="HeistMapPanel/Frame/VBox" unique_id=1450364298]
 layout_mode = 2
 

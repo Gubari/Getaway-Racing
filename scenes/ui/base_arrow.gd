@@ -7,8 +7,9 @@ extends Control
 @export var arrow_length: float = 42.0
 @export var arrow_width: float = 30.8
 
-const _COLOR_SAFE := Color(0.35, 0.92, 0.55, 0.95)
-const _COLOR_HEAT := Color(0.95, 0.35, 0.32, 0.95)
+const _COLOR_SAFE := Color(0.35, 0.92, 0.55, 0.95)    # zeleno: bezbedno (niko ne juri)
+const _COLOR_SEARCH := Color(1.0, 0.82, 0.2, 0.95)    # zuto: traze te (SEARCHING)
+const _COLOR_HEAT := Color(0.95, 0.35, 0.32, 0.95)    # crveno: jure te (CHASE)
 const _COLOR_OUTLINE := Color(0.0, 0.0, 0.0, 0.55)
 const _BLINK_INTERVAL := 0.35
 
@@ -67,16 +68,21 @@ func _edge_position(center: Vector2, offset: Vector2, margin: float) -> Vector2:
 	return center + dir * minf(scale_x, scale_y)
 
 func _update_color(delta: float) -> void:
-	if GameState.heat_level <= 0:
-		_blink_timer = 0.0
-		_arrow_color = _COLOR_SAFE
-		modulate = Color.WHITE
-		return
-
-	_blink_timer += delta
-	var blink_on := int(_blink_timer / _BLINK_INTERVAL) % 2 == 0
-	_arrow_color = _COLOR_HEAT
-	modulate = Color(1.0, 1.0, 1.0, 1.0 if blink_on else 0.4)
+	# Boja po stanju potere (kao policijski konus): crveno=CHASE, zuto=SEARCHING, zeleno=bezbedno.
+	match GameState.pursuit_music:
+		GameState.PursuitMusic.CHASING:
+			_blink_timer += delta
+			var blink_on := int(_blink_timer / _BLINK_INTERVAL) % 2 == 0
+			_arrow_color = _COLOR_HEAT
+			modulate = Color(1.0, 1.0, 1.0, 1.0 if blink_on else 0.4)
+		GameState.PursuitMusic.SEARCHING:
+			_blink_timer = 0.0
+			_arrow_color = _COLOR_SEARCH
+			modulate = Color.WHITE
+		_:
+			_blink_timer = 0.0
+			_arrow_color = _COLOR_SAFE
+			modulate = Color.WHITE
 
 func _draw() -> void:
 	var center := pivot_offset
