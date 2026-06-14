@@ -11,10 +11,10 @@ const ITEM_SHOP_HINT_DEFAULT := "Select an item for details."
 const CAR_SHOP_HINT_DEFAULT := "Select an upgrade for details."
 const CAR_ICON := preload("res://assets/sprites/vehicles/player_car_drive.png")
 
-const HEIST_MARKERS: Array[Dictionary] = [
-	{"id": "downtown", "label": "Downtown Vault", "position": Vector2(140, 200)},
-	{"id": "port", "label": "Port Warehouse", "position": Vector2(500, 280)},
-	{"id": "industrial", "label": "Industrial Yard", "position": Vector2(320, 90)},
+const HEIST_MAP_UI: Array[Dictionary] = [
+	{"id": "downtown", "position": Vector2(140, 200)},
+	{"id": "port", "position": Vector2(500, 280)},
+	{"id": "industrial", "position": Vector2(320, 90)},
 ]
 
 @onready var _main_panel: Control = $MainPanel
@@ -69,6 +69,7 @@ func _ready() -> void:
 	_build_car_shop()
 	ItemShop.cash_changed.connect(_on_shop_money_changed)
 	ItemShop.unlocks_changed.connect(_refresh_item_shop)
+	HeistProgress.heists_changed.connect(_refresh_heist_selection)
 	CarShop.upgrades_changed.connect(_refresh_car_shop)
 	_show_screen(Screen.MAIN)
 	Audio.play_main_menu_music()
@@ -89,6 +90,7 @@ func _show_screen(screen: Screen) -> void:
 	_item_shop_panel.visible = screen == Screen.ITEM_SHOP
 	_settings_panel.visible = screen == Screen.SETTINGS
 	if screen == Screen.HEIST_MAP:
+		_ensure_heist_selection_valid()
 		_refresh_heist_selection()
 	elif screen == Screen.ITEM_SHOP:
 		_refresh_item_shop()
@@ -100,38 +102,79 @@ func _on_shop_money_changed(_amount: int) -> void:
 	_refresh_car_shop()
 
 func _build_heist_markers() -> void:
-	for data in HEIST_MARKERS:
+	for data in HEIST_MAP_UI:
 		var btn := Button.new()
-		btn.text = data["label"]
+		var heist_id: String = data["id"]
+		btn.text = HeistCatalog.get_display_name(heist_id)
 		btn.position = data["position"]
 		btn.custom_minimum_size = Vector2(150, 36)
 		btn.add_theme_font_size_override("font_size", 16)
-		var heist_id: String = data["id"]
 		btn.pressed.connect(func() -> void:
+			if not HeistProgress.is_unlocked(heist_id):
+				_heist_hint.text = _locked_heist_hint(heist_id)
+				return
 			GameState.selected_heist_id = heist_id
 			_refresh_heist_selection()
 		)
 		_map_container.add_child(btn)
 		_marker_buttons.append(btn)
 
+func _heist_label(heist_id: String) -> String:
+	return HeistCatalog.get_display_name(heist_id)
+
+func _locked_heist_hint(heist_id: String) -> String:
+	var label := _heist_label(heist_id)
+	var prereq_id := HeistProgress.get_prerequisite_id(heist_id)
+	if prereq_id.is_empty():
+		return "%s is locked." % label
+	return "%s is locked. Complete %s first." % [label, _heist_label(prereq_id)]
+
+func _ensure_heist_selection_valid() -> void:
+	if not GameState.selected_heist_id.is_empty() \
+			and HeistProgress.is_unlocked(GameState.selected_heist_id):
+		return
+	GameState.selected_heist_id = ""
+	for data in HEIST_MAP_UI:
+		if HeistProgress.is_unlocked(data["id"]):
+			GameState.selected_heist_id = data["id"]
+			return
+
 func _refresh_heist_selection() -> void:
 	var selected := GameState.selected_heist_id
-	_heist_start_btn.disabled = selected.is_empty()
-	for i in HEIST_MARKERS.size():
+	for i in HEIST_MAP_UI.size():
 		var btn := _marker_buttons[i]
-		var data: Dictionary = HEIST_MARKERS[i]
-		var is_selected: bool = data["id"] == selected
-		btn.modulate = Color(1.15, 1.15, 0.85, 1) if is_selected else Color.WHITE
+		var data: Dictionary = HEIST_MAP_UI[i]
+		var heist_id: String = data["id"]
+		var label := _heist_label(heist_id)
+		var unlocked := HeistProgress.is_unlocked(heist_id)
+		var is_selected: bool = unlocked and heist_id == selected
+		btn.disabled = not unlocked
+		if unlocked:
+			btn.text = label
+			if HeistProgress.is_completed(heist_id):
+				btn.text = "%s ✓" % label
+		else:
+			btn.text = "%s (Locked)" % label
+		if not unlocked:
+			btn.modulate = Color(0.42, 0.42, 0.48, 1)
+		elif is_selected:
+			btn.modulate = Color(1.15, 1.15, 0.85, 1)
+		else:
+			btn.modulate = Color.WHITE
+	_heist_start_btn.disabled = selected.is_empty() or not HeistProgress.is_unlocked(selected)
 	if selected.is_empty():
 		_heist_hint.text = "Tap a marker to choose a heist location."
-	else:
-		for data in HEIST_MARKERS:
-			if data["id"] == selected:
-				_heist_hint.text = "Selected: %s" % data["label"]
-				break
+		return
+	if not HeistProgress.is_unlocked(selected):
+		_heist_hint.text = _locked_heist_hint(selected)
+		return
+	var status := "Completed" if HeistProgress.is_completed(selected) else "Ready"
+	_heist_hint.text = HeistCatalog.format_details(selected, status)
 
 func _start_heist() -> void:
 	if GameState.selected_heist_id.is_empty():
+		return
+	if not HeistProgress.is_unlocked(GameState.selected_heist_id):
 		return
 	Audio.stop_main_menu_music()
 	get_tree().change_scene_to_file(HEIST_SCENE)

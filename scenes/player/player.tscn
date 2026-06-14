@@ -15,10 +15,11 @@ shape = SubResource("1")
 
 [node name="CarSprite" type="Sprite2D" parent="." unique_id=2074711484]
 texture_filter = 1
-scale = Vector2(0.75, 0.75)
+scale = Vector2(0.825, 0.825)
 texture = ExtResource("2")
 hframes = 6
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=357124143]
+zoom = Vector2(1.1, 1.1)
 position_smoothing_enabled = false
 audio_listener_enabled = true

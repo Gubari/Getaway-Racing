@@ -17,7 +17,7 @@ shape = SubResource("1")
 
 [node name="CarSprite" type="Sprite2D" parent="." unique_id=1908964142]
 texture_filter = 1
-scale = Vector2(0.75, 0.75)
+scale = Vector2(0.825, 0.825)
 texture = ExtResource("2")
 hframes = 6
 
