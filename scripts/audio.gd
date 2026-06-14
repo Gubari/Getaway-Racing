@@ -33,6 +33,8 @@ var _sfx_collision: AudioStreamPlayer
 var _sfx_money: AudioStreamPlayer
 var _sfx_nitro: AudioStreamPlayer
 var _sfx_wild_card: AudioStreamPlayer
+var _pause_saved_music_mute := false
+var _pause_saved_sfx_mute := false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -46,7 +48,7 @@ func _ready() -> void:
 	add_child(_music)
 
 	var engine_stream := _prepare_engine_stream()
-	_engine = _new_player(engine_stream, &"Master", Node.PROCESS_MODE_ALWAYS)
+	_engine = _new_player(engine_stream, sfx_bus())
 	_engine.volume_db = -10.0
 	add_child(_engine)
 
@@ -111,7 +113,7 @@ func set_player_engine_active(active: bool) -> void:
 	_engine_active = active
 	if _engine == null or _engine.stream == null:
 		return
-	if active:
+	if active and not get_tree().paused and GameState.is_running:
 		if not _engine.playing:
 			_engine.play()
 	else:
@@ -221,3 +223,27 @@ func stop_heist_audio() -> void:
 	set_player_engine_active(false)
 	_music.stop()
 	_music_mode = -1
+
+func pause_gameplay_audio() -> void:
+	set_player_engine_active(false)
+	var music_bus := AudioServer.get_bus_index("Music")
+	var sfx_bus_idx := AudioServer.get_bus_index("SFX")
+	if music_bus >= 0:
+		_pause_saved_music_mute = AudioServer.is_bus_mute(music_bus)
+		AudioServer.set_bus_mute(music_bus, true)
+	if sfx_bus_idx >= 0:
+		_pause_saved_sfx_mute = AudioServer.is_bus_mute(sfx_bus_idx)
+		AudioServer.set_bus_mute(sfx_bus_idx, true)
+
+func resume_gameplay_audio() -> void:
+	var music_bus := AudioServer.get_bus_index("Music")
+	var sfx_bus_idx := AudioServer.get_bus_index("SFX")
+	if music_bus >= 0:
+		AudioServer.set_bus_mute(music_bus, _pause_saved_music_mute)
+	if sfx_bus_idx >= 0:
+		AudioServer.set_bus_mute(sfx_bus_idx, _pause_saved_sfx_mute)
+	if GameState.is_running and _music_mode >= 0 and not _music.playing:
+		_music.play()
+
+func resume_heist_audio() -> void:
+	resume_gameplay_audio()

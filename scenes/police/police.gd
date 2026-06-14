@@ -117,7 +117,6 @@ func _setup_siren() -> void:
 	_siren.max_distance = siren_max_distance
 	_siren.attenuation = siren_attenuation
 	_siren.panning_strength = 0.85
-	_siren.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(_siren)
 
 func _sync_drive_params() -> void:
