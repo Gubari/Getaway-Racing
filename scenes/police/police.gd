@@ -55,9 +55,15 @@ enum State { CHASE, SEARCHING, RETURNING }
 @export_group("Sprite")
 @export var car_anim_fps: float = 14.0
 
+@export_group("Siren")
+@export var siren_volume_db: float = 0.0
+@export var siren_max_distance: float = 4000.0
+@export var siren_attenuation: float = 0.65
+
 const TEX_NORMAL := preload("res://assets/sprites/police/police_car_drive.png")
 const TEX_CHASING := preload("res://assets/sprites/police/police_car_chasing_drive.png")
 const CAR_ANIM_FRAMES := 6
+const SIREN := preload("res://assets/audio/sfx/police_siren.wav")
 
 var state: State = State.CHASE                # nivo pocinje ODMAH u CHASE
 var player: Node2D = null
@@ -82,6 +88,8 @@ var _prev_heading: float = 0.0
 
 var _drive := TopDownCarDriving.new()
 var _car_anim_accum: float = 0.0
+var _siren: AudioStreamPlayer2D
+var _siren_on: bool = false
 
 @onready var los_ray: RayCast2D = $LineOfSight
 @onready var agent: NavigationAgent2D = $NavigationAgent2D
@@ -99,6 +107,18 @@ func _ready() -> void:
 	agent.path_desired_distance = 8.0
 	agent.target_desired_distance = 24.0   # veci prag "stigao" -> ne trazi pikselsku preciznost (manje kruzenja)
 	_sync_drive_params()
+	_setup_siren()
+
+func _setup_siren() -> void:
+	_siren = AudioStreamPlayer2D.new()
+	_siren.stream = Audio.prepare_wav_loop(SIREN)
+	_siren.bus = Audio.sfx_bus()
+	_siren.volume_db = siren_volume_db
+	_siren.max_distance = siren_max_distance
+	_siren.attenuation = siren_attenuation
+	_siren.panning_strength = 0.85
+	_siren.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(_siren)
 
 func _sync_drive_params() -> void:
 	_drive.acceleration = acceleration
@@ -122,12 +142,14 @@ func _physics_process(delta: float) -> void:
 		player = get_tree().get_first_node_in_group(Constants.GROUP_PLAYER)
 		if player != null:
 			last_known_pos = player.global_position
+		_update_siren(false)
 		return
 
 	if not GameState.is_running:
 		_drive.stop()
 		velocity = Vector2.ZERO
 		move_and_slide()
+		_update_siren(false)
 		return
 
 	if _control_lost_timer > 0.0:
@@ -139,6 +161,7 @@ func _physics_process(delta: float) -> void:
 		State.SEARCHING: _do_searching(delta, can_see)
 		State.RETURNING: _do_returning(delta, can_see)
 
+	_update_siren(state == State.CHASE or state == State.SEARCHING)
 	_update_car_sprite(delta)
 	queue_redraw()   # da se vision cone iscrta
 
@@ -157,6 +180,14 @@ func _update_car_sprite(delta: float) -> void:
 	if sirens_on or absf(_drive.get_forward_speed()) > 5.0:
 		_car_anim_accum += delta * car_anim_fps
 		_car_sprite.frame = int(_car_anim_accum) % CAR_ANIM_FRAMES
+
+func _update_siren(on: bool) -> void:
+	_siren_on = on and GameState.is_running
+	if _siren_on:
+		if not _siren.playing:
+			_siren.play()
+	elif _siren.playing:
+		_siren.stop()
 
 # --- VISION: ugao + domet + line-of-sight ---
 func _can_see_player() -> bool:
@@ -352,9 +383,11 @@ func _idle(delta: float) -> void:
 
 ## Poziva je ULJE: policija gubi kontrolu (klizi po inerciji + vrti se) `duration` sek.
 func lose_control(duration: float) -> void:
-	if _control_lost_timer <= 0.0:
+	var starting_skid := _control_lost_timer <= 0.0
+	if starting_skid:
 		_spin_dir = 1.0 if randf() < 0.5 else -1.0
 		velocity = Vector2.from_angle(rotation) * _drive.get_forward_speed()
+		Audio.play_tire_screech(global_position)
 	_control_lost_timer = maxf(_control_lost_timer, duration)
 
 func _skid(delta: float) -> void:

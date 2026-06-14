@@ -15,6 +15,7 @@ const COPY_PROPS: Array[String] = [
 	"chase_speed", "search_speed", "return_speed",
 	"lose_sight_grace", "vision_range", "wall_crash_enabled",
 	"lane_spacing", "row_spacing", "formation_range",
+	"siren_volume_db", "siren_max_distance", "siren_attenuation",
 ]
 
 var _cap: int = 5

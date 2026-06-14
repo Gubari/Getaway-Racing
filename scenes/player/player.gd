@@ -43,6 +43,12 @@ extends CharacterBody2D
 @export var brake_anim_fps: float = 6.0
 @export var feel_zoom_smoothing: float = 10.0
 
+@export_group("Engine Audio")
+@export var engine_volume_db: float = -10.0
+@export var engine_pitch_idle: float = 0.85
+@export var engine_pitch_max: float = 1.38
+@export var engine_pitch_smoothing: float = 10.0
+
 @export_group("Sharp Turn")
 @export var sharp_turn_loot_penalty: float = 1.5   ## % od starting_loot
 @export var sharp_turn_cooldown: float = 0.35
@@ -108,6 +114,7 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		move_and_slide()
 		_driving_zoom = _camera_base_zoom
+		Audio.set_player_engine_active(false)
 		return
 
 	var throttle := _get_throttle()
@@ -132,6 +139,30 @@ func _process(delta: float) -> void:
 		_crash_juice_time_left = maxf(0.0, _crash_juice_time_left - delta)
 	_update_car_sprite(delta)
 	_update_camera_effects(delta)
+	_update_engine_audio(delta)
+
+func _update_engine_audio(delta: float) -> void:
+	if not GameState.is_running:
+		Audio.set_player_engine_active(false)
+		return
+
+	Audio.set_player_engine_active(true)
+	var speed_cap := _get_speed_cap()
+	var forward_speed := _drive.get_forward_speed()
+	var speed_ratio := clampf(absf(forward_speed) / speed_cap, 0.0, 1.0)
+	var gas := clampf(maxf(_last_throttle, 0.0), 0.0, 1.0)
+	var brake := clampf(maxf(-_last_throttle, 0.0), 0.0, 1.0)
+	Audio.update_player_engine(
+		speed_ratio,
+		gas,
+		brake,
+		forward_speed,
+		delta,
+		engine_pitch_idle,
+		engine_pitch_max,
+		engine_volume_db,
+		engine_pitch_smoothing,
+	)
 
 func _get_speed_cap() -> float:
 	if _nitro_time_left > 0.0:
