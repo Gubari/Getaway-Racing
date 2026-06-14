@@ -1,0 +1,161 @@
+[gd_scene format=3 uid="uid://bxramow04q7mi"]
+
+[ext_resource type="Script" path="res://scenes/ui/heist_result_menu.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu/panel.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu/btn.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu/ic_resume.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu/ic_abandon.png" id="5"]
+
+[sub_resource type="StyleBoxTexture" id="sb_panel"]
+texture = ExtResource("2")
+texture_margin_left = 16.0
+texture_margin_top = 16.0
+texture_margin_right = 16.0
+texture_margin_bottom = 16.0
+content_margin_left = 28.0
+content_margin_top = 24.0
+content_margin_right = 28.0
+content_margin_bottom = 24.0
+
+[sub_resource type="StyleBoxTexture" id="sb_btn_n"]
+texture = ExtResource("3")
+texture_margin_left = 14.0
+texture_margin_top = 10.0
+texture_margin_right = 14.0
+texture_margin_bottom = 10.0
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxTexture" id="sb_btn_h"]
+texture = ExtResource("3")
+texture_margin_left = 14.0
+texture_margin_top = 10.0
+texture_margin_right = 14.0
+texture_margin_bottom = 10.0
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+modulate_color = Color(1.25, 1.25, 1.3, 1)
+
+[sub_resource type="StyleBoxTexture" id="sb_btn_p"]
+texture = ExtResource("3")
+texture_margin_left = 14.0
+texture_margin_top = 10.0
+texture_margin_right = 14.0
+texture_margin_bottom = 10.0
+content_margin_left = 18.0
+content_margin_top = 12.0
+content_margin_right = 18.0
+content_margin_bottom = 8.0
+modulate_color = Color(0.75, 0.78, 0.9, 1)
+
+[sub_resource type="StyleBoxEmpty" id="sb_focus"]
+
+[sub_resource type="Theme" id="theme_menu"]
+Button/colors/font_color = Color(0.92, 0.94, 1, 1)
+Button/colors/font_hover_color = Color(1, 1, 1, 1)
+Button/colors/font_pressed_color = Color(0.78, 0.84, 1, 1)
+Button/constants/h_separation = 12
+Button/font_sizes/font_size = 22
+Button/styles/focus = SubResource("sb_focus")
+Button/styles/hover = SubResource("sb_btn_h")
+Button/styles/normal = SubResource("sb_btn_n")
+Button/styles/pressed = SubResource("sb_btn_p")
+Label/colors/font_color = Color(1, 1, 1, 1)
+
+[node name="HeistResultMenu" type="CanvasLayer"]
+layer = 11
+script = ExtResource("1")
+
+[node name="Dim" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.55)
+
+[node name="SuccessPanel" type="CenterContainer" parent="."]
+visible = false
+texture_filter = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = SubResource("theme_menu")
+
+[node name="Frame" type="PanelContainer" parent="SuccessPanel"]
+custom_minimum_size = Vector2(460, 0)
+theme_override_styles/panel = SubResource("sb_panel")
+
+[node name="VBox" type="VBoxContainer" parent="SuccessPanel/Frame"]
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="SuccessPanel/Frame/VBox"]
+theme_override_colors/font_color = Color(0.337, 0.349, 0.447, 1)
+theme_override_font_sizes/font_size = 34
+text = "HEIST SUCCESSFUL"
+horizontal_alignment = 1
+
+[node name="Sep" type="HSeparator" parent="SuccessPanel/Frame/VBox"]
+
+[node name="Subtitle" type="Label" parent="SuccessPanel/Frame/VBox"]
+theme_override_colors/font_color = Color(0.337, 0.349, 0.447, 1)
+theme_override_font_sizes/font_size = 18
+text = "You got away with the loot."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LootLabel" type="Label" parent="SuccessPanel/Frame/VBox"]
+theme_override_colors/font_color = Color(0.72, 0.58, 0.12, 1)
+theme_override_font_sizes/font_size = 24
+text = "Loot secured: 0"
+horizontal_alignment = 1
+
+[node name="Sep2" type="HSeparator" parent="SuccessPanel/Frame/VBox"]
+
+[node name="ContinueBtn" type="Button" parent="SuccessPanel/Frame/VBox"]
+icon = ExtResource("4")
+text = "Back to Menu"
+
+[node name="ArrestedPanel" type="CenterContainer" parent="."]
+visible = false
+texture_filter = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = SubResource("theme_menu")
+
+[node name="Frame" type="PanelContainer" parent="ArrestedPanel"]
+custom_minimum_size = Vector2(460, 0)
+theme_override_styles/panel = SubResource("sb_panel")
+
+[node name="VBox" type="VBoxContainer" parent="ArrestedPanel/Frame"]
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="ArrestedPanel/Frame/VBox"]
+theme_override_colors/font_color = Color(0.337, 0.349, 0.447, 1)
+theme_override_font_sizes/font_size = 34
+text = "YOU'VE BEEN ARRESTED"
+horizontal_alignment = 1
+
+[node name="Sep" type="HSeparator" parent="ArrestedPanel/Frame/VBox"]
+
+[node name="Subtitle" type="Label" parent="ArrestedPanel/Frame/VBox"]
+theme_override_colors/font_color = Color(0.337, 0.349, 0.447, 1)
+theme_override_font_sizes/font_size = 18
+text = "The cops caught you before you could stash the cash."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LootLabel" type="Label" parent="ArrestedPanel/Frame/VBox"]
+theme_override_colors/font_color = Color(0.92, 0.28, 0.28, 1)
+theme_override_font_sizes/font_size = 22
+text = "Loot recovered: 0"
+horizontal_alignment = 1
+
+[node name="Sep2" type="HSeparator" parent="ArrestedPanel/Frame/VBox"]
+
+[node name="ContinueBtn" type="Button" parent="ArrestedPanel/Frame/VBox"]
+icon = ExtResource("5")
+text = "Back to Menu"

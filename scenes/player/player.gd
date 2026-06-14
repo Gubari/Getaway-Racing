@@ -8,9 +8,10 @@ extends CharacterBody2D
 @export var reverse_max_speed: float = 160.0
 @export var drag: float = 3.2
 @export var brake_force: float = 1100.0
-@export var steer_speed: float = 3.1
-@export var steering_smoothing: float = 12.0
-@export var min_speed_to_steer: float = 35.0
+@export var steer_speed: float = 4.4
+@export var steering_smoothing: float = 22.0
+@export var min_speed_to_steer: float = 15.0
+@export var min_steer_speed_factor: float = 0.58
 @export var high_speed_accel_factor: float = 0.45
 
 @export_group("Nitro")
@@ -107,6 +108,7 @@ func _sync_drive_params() -> void:
 	_drive.steer_speed = steer_speed
 	_drive.steering_smoothing = steering_smoothing
 	_drive.min_speed_to_steer = min_speed_to_steer
+	_drive.min_steer_speed_factor = min_steer_speed_factor
 	_drive.high_speed_accel_factor = high_speed_accel_factor
 	_drive.wall_penalty_rearm_sec = wall_penalty_rearm_sec
 	_drive.crash_min_impact_speed = crash_min_impact_speed

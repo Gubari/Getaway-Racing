@@ -9,6 +9,13 @@ size = Vector2(44, 24)
 [node name="Player" type="CharacterBody2D" unique_id=731337925 groups=["player"]]
 collision_mask = 4
 script = ExtResource("1")
+acceleration = 400.0
+max_speed = 360.0
+steer_speed = 3.4
+steering_smoothing = 16.0
+crash_stun_sec = 0.1
+crash_steer_lock_sec = 0.1
+crash_shake_strength = 10.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1010217735]
 shape = SubResource("1")
@@ -20,6 +27,4 @@ texture = ExtResource("2")
 hframes = 6
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=357124143]
-zoom = Vector2(1.1, 1.1)
-position_smoothing_enabled = false
-audio_listener_enabled = true
+zoom = Vector2(1.15, 1.15)
