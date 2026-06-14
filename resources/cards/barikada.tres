@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="Card" format=3 uid="uid://p3dmeg04qw3b"]
+
+[ext_resource type="Script" uid="uid://dpcyx122u6xpl" path="res://scenes/cards/card.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/cards/barricade.tscn" id="2"]
+
+[resource]
+script = ExtResource("1")
+type = 2
+display_name = "Barikada"
+description = "Jako usporava poteru. Redak resurs."
+effect_scene = ExtResource("2")
+max_charges = 1

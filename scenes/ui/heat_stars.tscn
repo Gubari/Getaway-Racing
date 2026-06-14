@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://day8me5mnlxyd"]
+
+[ext_resource type="Script" uid="uid://lxhcmfrjqttu" path="res://scenes/ui/heat_stars.gd" id="1"]
+
+[node name="HeatStars" type="Control" unique_id=2088034546]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1")
+star_size = 50.0

@@ -1,18 +1,25 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://bcesjo4k441x7"]
 
-[ext_resource type="Script" path="res://scenes/player/player.gd" id="1"]
+[ext_resource type="Script" uid="uid://cji4388qyux64" path="res://scenes/player/player.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://b2xtd3m2ggr8i" path="res://assets/sprites/vehicles/player_car_drive.png" id="2"]
 
 [sub_resource type="RectangleShape2D" id="1"]
-size = Vector2(32, 48)
+size = Vector2(44, 24)
 
-[node name="Player" type="CharacterBody2D" groups=["player"]]
-collision_layer = 1
+[node name="Player" type="CharacterBody2D" unique_id=731337925 groups=["player"]]
 collision_mask = 4
 script = ExtResource("1")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1010217735]
 shape = SubResource("1")
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="CarSprite" type="Sprite2D" parent="." unique_id=2074711484]
+texture_filter = 1
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("2")
+hframes = 6
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=357124143]
 position_smoothing_enabled = true
 position_smoothing_speed = 10.0
+audio_listener_enabled = true

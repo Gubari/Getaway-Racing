@@ -1,0 +1,229 @@
+[gd_scene format=3 uid="uid://b4bi0f3d0rm3y"]
+
+[ext_resource type="Script" path="res://scenes/ui/pause_menu.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu/panel.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu/btn.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu/btn_pause.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu/ic_resume.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu/ic_settings.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu/ic_abandon.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu/ic_back.png" id="8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu/ic_sfx.png" id="9"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu/slider_track.png" id="10"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu/slider_fill.png" id="11"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu/slider_grabber.png" id="12"]
+
+[sub_resource type="StyleBoxTexture" id="sb_panel"]
+texture = ExtResource("2")
+texture_margin_left = 16.0
+texture_margin_top = 16.0
+texture_margin_right = 16.0
+texture_margin_bottom = 16.0
+content_margin_left = 28.0
+content_margin_top = 24.0
+content_margin_right = 28.0
+content_margin_bottom = 24.0
+
+[sub_resource type="StyleBoxTexture" id="sb_btn_n"]
+texture = ExtResource("3")
+texture_margin_left = 14.0
+texture_margin_top = 10.0
+texture_margin_right = 14.0
+texture_margin_bottom = 10.0
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxTexture" id="sb_btn_h"]
+texture = ExtResource("3")
+texture_margin_left = 14.0
+texture_margin_top = 10.0
+texture_margin_right = 14.0
+texture_margin_bottom = 10.0
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+modulate_color = Color(1.25, 1.25, 1.3, 1)
+
+[sub_resource type="StyleBoxTexture" id="sb_btn_p"]
+texture = ExtResource("3")
+texture_margin_left = 14.0
+texture_margin_top = 10.0
+texture_margin_right = 14.0
+texture_margin_bottom = 10.0
+content_margin_left = 18.0
+content_margin_top = 12.0
+content_margin_right = 18.0
+content_margin_bottom = 8.0
+modulate_color = Color(0.75, 0.78, 0.9, 1)
+
+[sub_resource type="StyleBoxEmpty" id="sb_focus"]
+
+[sub_resource type="StyleBoxTexture" id="sb_track"]
+texture = ExtResource("10")
+texture_margin_left = 13.0
+texture_margin_top = 11.0
+texture_margin_right = 13.0
+texture_margin_bottom = 11.0
+content_margin_left = 8.0
+content_margin_top = 11.0
+content_margin_right = 8.0
+content_margin_bottom = 11.0
+
+[sub_resource type="StyleBoxTexture" id="sb_fill"]
+texture = ExtResource("11")
+texture_margin_left = 12.0
+texture_margin_top = 10.0
+texture_margin_right = 12.0
+texture_margin_bottom = 10.0
+
+[sub_resource type="Theme" id="theme_menu"]
+Button/colors/font_color = Color(0.92, 0.94, 1, 1)
+Button/colors/font_hover_color = Color(1, 1, 1, 1)
+Button/colors/font_pressed_color = Color(0.78, 0.84, 1, 1)
+Button/constants/h_separation = 12
+Button/font_sizes/font_size = 22
+Button/styles/focus = SubResource("sb_focus")
+Button/styles/hover = SubResource("sb_btn_h")
+Button/styles/normal = SubResource("sb_btn_n")
+Button/styles/pressed = SubResource("sb_btn_p")
+HSlider/styles/grabber_area = SubResource("sb_fill")
+HSlider/styles/grabber_area_highlight = SubResource("sb_fill")
+HSlider/styles/slider = SubResource("sb_track")
+HSlider/textures/grabber = ExtResource("12")
+HSlider/textures/grabber_highlight = ExtResource("12")
+Label/colors/font_color = Color(1, 1, 1, 1)
+
+[node name="PauseMenu" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1")
+
+[node name="Dim" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.55)
+
+[node name="PausePanel" type="CenterContainer" parent="."]
+texture_filter = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = SubResource("theme_menu")
+
+[node name="Frame" type="PanelContainer" parent="PausePanel"]
+custom_minimum_size = Vector2(420, 0)
+theme_override_styles/panel = SubResource("sb_panel")
+
+[node name="VBox" type="VBoxContainer" parent="PausePanel/Frame"]
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="PausePanel/Frame/VBox"]
+theme_override_colors/font_color = Color(0.337, 0.349, 0.447, 1)
+theme_override_font_sizes/font_size = 34
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="Sep" type="HSeparator" parent="PausePanel/Frame/VBox"]
+
+[node name="ResumeBtn" type="Button" parent="PausePanel/Frame/VBox"]
+icon = ExtResource("5")
+text = "Resume"
+
+[node name="SettingsBtn" type="Button" parent="PausePanel/Frame/VBox"]
+icon = ExtResource("6")
+text = "Settings"
+
+[node name="AbandonBtn" type="Button" parent="PausePanel/Frame/VBox"]
+icon = ExtResource("7")
+text = "Abandon the Heist"
+
+[node name="SettingsPanel" type="CenterContainer" parent="."]
+texture_filter = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = SubResource("theme_menu")
+
+[node name="Frame" type="PanelContainer" parent="SettingsPanel"]
+custom_minimum_size = Vector2(460, 0)
+theme_override_styles/panel = SubResource("sb_panel")
+
+[node name="VBox" type="VBoxContainer" parent="SettingsPanel/Frame"]
+theme_override_constants/separation = 18
+
+[node name="Title" type="Label" parent="SettingsPanel/Frame/VBox"]
+theme_override_colors/font_color = Color(0.337, 0.349, 0.447, 1)
+theme_override_font_sizes/font_size = 34
+text = "SETTINGS"
+horizontal_alignment = 1
+
+[node name="Sep" type="HSeparator" parent="SettingsPanel/Frame/VBox"]
+
+[node name="SfxRow" type="HBoxContainer" parent="SettingsPanel/Frame/VBox"]
+theme_override_constants/separation = 12
+
+[node name="Icon" type="TextureRect" parent="SettingsPanel/Frame/VBox/SfxRow"]
+custom_minimum_size = Vector2(28, 28)
+texture = ExtResource("9")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="SettingsPanel/Frame/VBox/SfxRow"]
+custom_minimum_size = Vector2(90, 0)
+theme_override_colors/font_color = Color(0.337, 0.349, 0.447, 1)
+theme_override_font_sizes/font_size = 22
+text = "SFX"
+vertical_alignment = 1
+
+[node name="SfxSlider" type="HSlider" parent="SettingsPanel/Frame/VBox/SfxRow"]
+custom_minimum_size = Vector2(240, 30)
+size_flags_horizontal = 3
+size_flags_vertical = 1
+max_value = 1.0
+step = 0.05
+value = 0.8
+
+[node name="MusicRow" type="HBoxContainer" parent="SettingsPanel/Frame/VBox"]
+theme_override_constants/separation = 12
+
+[node name="Icon" type="TextureRect" parent="SettingsPanel/Frame/VBox/MusicRow"]
+custom_minimum_size = Vector2(28, 28)
+texture = ExtResource("9")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="SettingsPanel/Frame/VBox/MusicRow"]
+custom_minimum_size = Vector2(90, 0)
+theme_override_colors/font_color = Color(0.337, 0.349, 0.447, 1)
+theme_override_font_sizes/font_size = 22
+text = "Music"
+vertical_alignment = 1
+
+[node name="MusicSlider" type="HSlider" parent="SettingsPanel/Frame/VBox/MusicRow"]
+custom_minimum_size = Vector2(240, 30)
+size_flags_horizontal = 3
+size_flags_vertical = 1
+max_value = 1.0
+step = 0.05
+value = 0.7
+
+[node name="Sep2" type="HSeparator" parent="SettingsPanel/Frame/VBox"]
+
+[node name="ReturnBtn" type="Button" parent="SettingsPanel/Frame/VBox"]
+icon = ExtResource("8")
+text = "Return"
+
+[node name="PauseButton" type="TextureButton" parent="."]
+texture_filter = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -84.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 84.0
+ignore_texture_size = true
+stretch_mode = 0
+texture_normal = ExtResource("4")

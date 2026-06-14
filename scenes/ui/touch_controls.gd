@@ -41,7 +41,6 @@ const PEDAL_BASE := Color(0.24, 0.24, 0.29)
 @onready var _gas: TouchScreenButton = $GasButton
 @onready var _labels_layer: Control = $LabelsLayer
 
-var _click_player: AudioStreamPlayer
 var _debug_label: Label
 
 func _ready() -> void:
@@ -53,11 +52,6 @@ func _ready() -> void:
 	for button in [_steer_left, _steer_right, _brake, _gas]:
 		button.visibility_mode = TouchScreenButton.VISIBILITY_ALWAYS
 		button.passby_press = false
-		_wire_feedback(button)
-
-	_click_player = AudioStreamPlayer.new()
-	_click_player.stream = load("res://assets/audio/sfx/ui_click.wav")
-	add_child(_click_player)
 
 	if show_input_debug:
 		_setup_debug_label()
@@ -207,7 +201,7 @@ func _draw_pedal(image: Image, pressed: bool) -> void:
 		_fill_round_rect(
 			image,
 			Rect2i(inner.position.x + int(inner.size.x * 0.16), ry, int(inner.size.x * 0.68), rib_h),
-			rib_h / 2,
+			int(rib_h / 2.0),
 			PEDAL_GRIP
 		)
 
@@ -238,10 +232,10 @@ func _fill_round_rect(image: Image, rect: Rect2i, corner: int, color: Color) -> 
 	var y0 := rect.position.y
 	var x1 := rect.end.x
 	var y1 := rect.end.y
-	var r := clampi(corner, 0, int(mini(rect.size.x, rect.size.y) / 2))
+	var r := clampi(corner, 0, int(mini(rect.size.x, rect.size.y) / 2.0))
 
 	var tl := Vector2(x0 + r, y0 + r)
-	var tr := Vector2(x1 - r, y0 + r)
+	var c_tr := Vector2(x1 - r, y0 + r)
 	var bl := Vector2(x0 + r, y1 - r)
 	var br := Vector2(x1 - r, y1 - r)
 
@@ -257,7 +251,7 @@ func _fill_round_rect(image: Image, rect: Rect2i, corner: int, color: Color) -> 
 			if x < x0 + r and y < y0 + r:
 				inside = p.distance_to(tl) <= r
 			elif x >= x1 - r and y < y0 + r:
-				inside = p.distance_to(tr) <= r
+				inside = p.distance_to(c_tr) <= r
 			elif x < x0 + r and y >= y1 - r:
 				inside = p.distance_to(bl) <= r
 			elif x >= x1 - r and y >= y1 - r:
@@ -303,18 +297,6 @@ func _setup_debug_label() -> void:
 	_debug_label.add_theme_font_size_override("font_size", 13)
 	_debug_label.add_theme_color_override("font_color", Color(0.7, 1.0, 0.7, 0.9))
 	_labels_layer.add_child(_debug_label)
-
-func _wire_feedback(button: TouchScreenButton) -> void:
-	button.pressed.connect(_on_touch_pressed)
-	button.released.connect(_on_touch_released)
-
-func _on_touch_pressed() -> void:
-	if not GameState.is_running:
-		return
-	_click_player.play()
-
-func _on_touch_released() -> void:
-	pass
 
 func _disable_controls() -> void:
 	for button in [_steer_left, _steer_right, _brake, _gas]:
