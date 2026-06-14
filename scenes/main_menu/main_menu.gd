@@ -37,10 +37,10 @@ const HEIST_MAP_ZOOM_STEP := 1.12 # mnozilac po jednom "tiku" scroll-a
 @onready var _item_shop_panel: Control = $ItemShopPanel
 @onready var _settings_panel: Control = $SettingsPanel
 
-@onready var _plan_btn: Button = $MainPanel/PlanHeistBtn
-@onready var _car_shop_btn: Button = $MainPanel/CarShopBtn
-@onready var _item_shop_btn: Button = $MainPanel/ItemShopBtn
-@onready var _settings_btn: Button = $MainPanel/SettingsBtn
+@onready var _plan_btn: Button = $MainPanel/Center/PlanHeistBtn
+@onready var _car_shop_btn: Button = $MainPanel/Center/CarShopBtn
+@onready var _item_shop_btn: Button = $MainPanel/Center/ItemShopBtn
+@onready var _settings_btn: Button = $MainPanel/Center/SettingsBtn
 
 @onready var _heist_back_btn: Button = $HeistMapPanel/Frame/VBox/ButtonRow/BackBtn
 @onready var _heist_start_btn: Button = $HeistMapPanel/Frame/VBox/ButtonRow/StartHeistBtn
