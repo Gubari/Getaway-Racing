@@ -14,6 +14,8 @@
 [ext_resource type="Resource" uid="uid://pw0lr6j6l6o8" path="res://resources/cards/nitro.tres" id="11"]
 [ext_resource type="Resource" uid="uid://p3dmeg04qw3b" path="res://resources/cards/barikada.tres" id="12"]
 [ext_resource type="Script" path="res://scenes/police/police_spawner.gd" id="13"]
+[ext_resource type="Script" path="res://scenes/effects/loot_burst.gd" id="14"]
+[ext_resource type="PackedScene" path="res://scenes/effects/coin.tscn" id="15"]
 
 [node name="Main" type="Node2D" unique_id=1089452316]
 script = ExtResource("1")
@@ -45,6 +47,10 @@ wall_crash_enabled = false
 position = Vector2(150, 200)
 script = ExtResource("13")
 police_scene = ExtResource("3")
+
+[node name="LootBurst" type="Node2D" parent="."]
+script = ExtResource("14")
+coin_scene = ExtResource("15")
 
 [node name="Garage" parent="." unique_id=1636931700 instance=ExtResource("7")]
 position = Vector2(1306, 803)
