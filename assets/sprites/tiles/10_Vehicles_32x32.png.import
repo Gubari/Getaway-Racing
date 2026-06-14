@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://wdwn7lbisbvd"
-path="res://.godot/imported/2_City_Terrains_16x16.png-dd0e20e03c1201613d7498164a034b56.ctex"
+uid="uid://ijsvimpj570x"
+path="res://.godot/imported/10_Vehicles_32x32.png-98ea08fa2b538b0b9fcf0c712a3d5fa1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/tiles/2_City_Terrains_16x16.png"
-dest_files=["res://.godot/imported/2_City_Terrains_16x16.png-dd0e20e03c1201613d7498164a034b56.ctex"]
+source_file="res://assets/sprites/tiles/10_Vehicles_32x32.png"
+dest_files=["res://.godot/imported/10_Vehicles_32x32.png-98ea08fa2b538b0b9fcf0c712a3d5fa1.ctex"]
 
 [params]
 
