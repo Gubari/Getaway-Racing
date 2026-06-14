@@ -1,10 +1,12 @@
-[gd_resource type="Resource" script_class="Card" format=3 uid="uid://pw0lr6j6l6o8"]
+[gd_resource type="Resource" script_class="Card" load_steps=3 format=3 uid="uid://pw0lr6j6l6o8"]
 
 [ext_resource type="Script" uid="uid://dpcyx122u6xpl" path="res://scenes/cards/card.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/cards/nitro_card.png" id="2"]
 
 [resource]
 script = ExtResource("1")
 type = 3
 display_name = "Nitro"
-description = "Burst brzine. Trese plen malo."
+icon = ExtResource("2")
+description = "Short speed burst. Shakes a little loot loose from the trunk."
 cooldown = 6.0

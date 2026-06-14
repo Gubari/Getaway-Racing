@@ -83,6 +83,10 @@ var lose_timer: float = 0.0                    # grace dok jos "pamti" igraca u 
 var _control_lost_timer: float = 0.0
 var _spin_dir: float = 1.0
 
+# usporavanje od eksera
+var _slow_timer: float = 0.0
+var _slow_factor: float = 1.0
+
 # watchdog protiv zaglavljivanja + spin (donut) detekcija
 var _last_dist: float = INF
 var _stuck_timer: float = 0.0
@@ -111,7 +115,15 @@ func _ready() -> void:
 	agent.path_desired_distance = 8.0
 	agent.target_desired_distance = 24.0   # veci prag "stigao" -> ne trazi pikselsku preciznost (manje kruzenja)
 	_sync_drive_params()
+	_apply_car_upgrades()
 	_setup_siren()
+
+func _apply_car_upgrades() -> void:
+	if CarShop == null:
+		return
+	var mult := CarShop.get_pursuit_time_multiplier()
+	lose_sight_grace *= mult
+	search_time *= mult
 
 func _setup_siren() -> void:
 	_siren = AudioStreamPlayer2D.new()
@@ -157,6 +169,10 @@ func _physics_process(delta: float) -> void:
 
 	if _control_lost_timer > 0.0:
 		_control_lost_timer -= delta
+	if _slow_timer > 0.0:
+		_slow_timer -= delta
+		if _slow_timer <= 0.0:
+			_slow_factor = 1.0
 
 	var can_see := _can_see_player()
 	match state:
@@ -349,7 +365,7 @@ func _move(delta: float, speed_cap: float, slow_near_target: bool = false) -> vo
 				1.0
 			)
 			throttle = 1.0
-			cap = speed_cap * _speed_factor(angle_diff, slow_near_target)
+			cap = speed_cap * _speed_factor(angle_diff, slow_near_target) * _slow_factor
 
 	var pre_move_velocity := _drive.physics_step(self, delta, throttle, steer_input, cap)
 	if wall_crash_enabled:
@@ -393,6 +409,11 @@ func lose_control(duration: float) -> void:
 		velocity = Vector2.from_angle(rotation) * _drive.get_forward_speed()
 		Audio.play_tire_screech(global_position)
 	_control_lost_timer = maxf(_control_lost_timer, duration)
+
+## Pozivaju EKSERI: privremeno smanji maks brzinu dok traje efekat.
+func apply_slowdown(factor: float, duration: float) -> void:
+	_slow_factor = minf(_slow_factor, factor)
+	_slow_timer = maxf(_slow_timer, duration)
 
 func _skid(delta: float) -> void:
 	rotation += _spin_dir * skid_spin * delta

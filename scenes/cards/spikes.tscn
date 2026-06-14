@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/cards/spikes.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/cards/spikes_card.png" id="2"]
+
+[sub_resource type="CircleShape2D" id="1"]
+radius = 30.0
+
+[node name="Spikes" type="Area2D"]
+script = ExtResource("1")
+slow_factor = 0.55
+slow_duration = 2.5
+lifetime = 8.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("1")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("2")

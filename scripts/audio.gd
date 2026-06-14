@@ -7,6 +7,7 @@ const ENGINE := preload("res://assets/audio/sfx/player_engine.wav")
 const MUSIC_CHASING := preload("res://assets/audio/music/music_chasing.ogg")
 const MUSIC_SEARCHING := preload("res://assets/audio/music/music_searching.ogg")
 const MUSIC_RETURNING := preload("res://assets/audio/music/music_returning.ogg")
+const MAIN_MENU_MUSIC := preload("res://assets/audio/music/main_meni.ogg")
 
 const SFX_COLLISION := preload("res://assets/audio/sfx/collision_car.wav")
 const SFX_MONEY := preload("res://assets/audio/sfx/money.wav")
@@ -15,13 +16,12 @@ const SFX_NITRO := preload("res://assets/audio/sfx/nitro.wav")
 const SFX_WILD_CARD := preload("res://assets/audio/sfx/wild_card.wav")
 
 const WILD_CARD_TYPES: Array[int] = [
-	Card.Type.SPIKES,
-	Card.Type.FAKE_MONEY,
 	Card.Type.JOKER,
 ]
 
 var _ui: AudioStreamPlayer
 var _music: AudioStreamPlayer
+var _menu_music: AudioStreamPlayer
 var _engine: AudioStreamPlayer
 var _music_mode := -1
 var _last_loot: float = -1.0
@@ -46,6 +46,11 @@ func _ready() -> void:
 	_music.volume_db = -8.0
 	_music.finished.connect(_on_music_finished)
 	add_child(_music)
+
+	_menu_music = _new_player(MAIN_MENU_MUSIC, _bus(&"Music"), Node.PROCESS_MODE_ALWAYS)
+	_menu_music.volume_db = -8.0
+	_menu_music.finished.connect(_on_menu_music_finished)
+	add_child(_menu_music)
 
 	var engine_stream := _prepare_engine_stream()
 	_engine = _new_player(engine_stream, sfx_bus())
@@ -108,6 +113,21 @@ func _new_player(
 	player.bus = bus
 	player.process_mode = mode
 	return player
+
+func play_main_menu_music() -> void:
+	stop_heist_audio()
+	if _menu_music == null:
+		return
+	if not _menu_music.playing:
+		_menu_music.play()
+
+func stop_main_menu_music() -> void:
+	if _menu_music != null and _menu_music.playing:
+		_menu_music.stop()
+
+func _on_menu_music_finished() -> void:
+	if _menu_music != null and not GameState.is_running:
+		_menu_music.play()
 
 func set_player_engine_active(active: bool) -> void:
 	_engine_active = active
@@ -200,6 +220,7 @@ func _on_pursuit_music_changed(mode: int) -> void:
 	_play_heist_music(mode)
 
 func _play_heist_music(mode: int) -> void:
+	stop_main_menu_music()
 	if _music_mode == mode and _music.playing:
 		return
 
