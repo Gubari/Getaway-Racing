@@ -10,6 +10,7 @@ var brake_force: float = 1100.0
 var steer_speed: float = 3.1
 var steering_smoothing: float = 12.0
 var min_speed_to_steer: float = 35.0
+var min_steer_speed_factor: float = 0.25
 var high_speed_accel_factor: float = 0.45
 
 var wall_penalty_rearm_sec: float = 0.75
@@ -97,7 +98,8 @@ func _apply_steering(body: CharacterBody2D, delta: float, cap: float) -> void:
 	if absf(forward_speed) < min_speed_to_steer:
 		return
 
-	var speed_factor := clampf(absf(forward_speed) / cap, 0.25, 1.0)
+	var speed_ratio := clampf(absf(forward_speed) / cap, 0.0, 1.0)
+	var speed_factor := lerpf(min_steer_speed_factor, 1.0, speed_ratio)
 	var direction_sign := 1.0 if forward_speed >= 0.0 else -1.0
 	body.rotation += steer_smoothed * steer_speed * speed_factor * direction_sign * delta
 

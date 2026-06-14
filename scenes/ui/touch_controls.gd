@@ -10,17 +10,17 @@ extends Control
 
 @export_group("Skaliranje")
 ## Globalni mnozilac velicine svih kontrola. Povecaj ako su dugmad sitna na telefonu.
-@export_range(0.5, 3.0, 0.05) var ui_scale: float = 1.0
+@export_range(0.5, 3.0, 0.05) var ui_scale: float = 1.162
 
 @export_group("Dimenzije (bazni px)")
-@export var steer_btn_size: Vector2 = Vector2(140.0, 140.0)
-@export var steer_gap: float = 40.0
+@export var steer_btn_size: Vector2 = Vector2(147.8, 147.8)
+@export var steer_gap: float = 42.2
 ## Kocnica je sira, gas uzi (kao u stvarnom autu) — poravnati po istoj donjoj ravni.
-@export var brake_pedal_size: Vector2 = Vector2(116.0, 124.0)
-@export var gas_pedal_size: Vector2 = Vector2(90.0, 190.0)
-@export var pedal_gap: float = 40.0
-@export var bottom_margin: float = 18.0
-@export var card_strip_h: float = 110.0
+@export var brake_pedal_size: Vector2 = Vector2(116.2, 125.0)
+@export var gas_pedal_size: Vector2 = Vector2(91.5, 184.8)
+@export var pedal_gap: float = 42.2
+@export var bottom_margin: float = 17.6
+@export var card_strip_h: float = 114.4
 
 @export_group("Debug")
 @export var show_input_debug: bool = true

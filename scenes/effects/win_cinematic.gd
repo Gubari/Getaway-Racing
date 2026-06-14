@@ -26,6 +26,10 @@ func _run() -> void:
 	var player := get_tree().get_first_node_in_group(Constants.GROUP_PLAYER)
 	var door := get_tree().current_scene.find_child("GarageDoor", true, false) as AnimatedSprite2D
 
+	var hud := get_tree().current_scene.get_node_or_null("HUD")
+	if hud != null and hud.has_method("hide_ability_bar"):
+		hud.hide_ability_bar()
+
 	# 1) zamrzni igraca + policiju
 	var start_zoom := Vector2.ONE
 	if player != null:

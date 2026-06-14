@@ -344,7 +344,7 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.337, 0.349, 0.447, 1)
 theme_override_font_sizes/font_size = 18
-text = "Spend money on heist gear."
+text = "Buy gear and equip up to 3 abilities for each heist."
 horizontal_alignment = 1
 autowrap_mode = 2
 

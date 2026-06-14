@@ -19,7 +19,7 @@ const UPGRADES: Array[Dictionary] = [
 	},
 	{
 		"id": &"durability",
-		"name": "Reinforced Trunk",
+		"name": "Durability",
 		"description": "Reduces money lost on wall crashes by 15% per level.",
 		"prices": [3500, 5500, 8000],
 	},

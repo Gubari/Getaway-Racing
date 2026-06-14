@@ -9,19 +9,21 @@ var index: int
 var _color := Color(0.4, 0.4, 0.45)
 var _type: int = -1
 var _icon: Texture2D
-var _radius := 42.0
+var _radius := 45.36
 var _time := 0.0
 var _press := 0.0
 var _last_tap_ms: int = -1000   # debounce za mouse+touch duplikat istog tapa
 
-func setup(mgr: Node, idx: int) -> void:
+func setup(mgr: Node, idx: int, scale: float = 1.0) -> void:
 	manager = mgr
 	index = idx
 	var ab: Card = manager.get_ability(idx)
 	_type = ab.type if ab != null else -1
 	_icon = ab.icon if ab != null else null
 	_color = _color_for(_type)
-	custom_minimum_size = Vector2(98, 98)
+	var side := 106.0 * scale
+	_radius = 45.36 * scale
+	custom_minimum_size = Vector2(side, side)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 

@@ -7,7 +7,7 @@
 [resource]
 script = ExtResource("1")
 type = 0
-display_name = "Pile of Nails"
+display_name = "Nails"
 icon = ExtResource("3")
 description = "Toss a nail pile behind you. Slows pursuing cops that drive over it."
 effect_scene = ExtResource("2")

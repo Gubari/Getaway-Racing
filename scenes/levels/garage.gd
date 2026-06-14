@@ -1,15 +1,10 @@
 extends Area2D
-## CILJ LEVELA: igrac ulazi u garažu -> pobeda (samo kad je policija u RETURNING).
+## CILJ LEVELA: igrac ulazi u garažu -> pobeda (samo kad je heat 0).
 ## Vlasnik: A. Instanciraj u main.tscn (pored Player/Police) i pomeri po levelu.
 
-const BLOCKED_MESSAGE := "MORAS DA POBEGNES OD POLICIJE"
-
 @export var zone_size: Vector2 = Vector2(100, 100)
-@export var blocked_message_cooldown: float = 1.5
 
 @onready var _shape: CollisionShape2D = $CollisionShape2D
-
-var _blocked_message_left: float = 0.0
 
 func _ready() -> void:
 	add_to_group(Constants.GROUP_GARAGE)
@@ -18,36 +13,25 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	queue_redraw()
 
-func _process(delta: float) -> void:
-	if _blocked_message_left > 0.0:
-		_blocked_message_left = maxf(0.0, _blocked_message_left - delta)
-
 func _on_body_entered(body: Node2D) -> void:
 	if not body.is_in_group(Constants.GROUP_PLAYER):
 		return
 	if not GameState.is_running:
 		return
 
-	if not _any_police_chasing():
-		# Pobeda kad te NIKO trenutno ne vidi (svi zuti/sivi). Cinematic zove reach_base.
-		var cine := get_tree().get_first_node_in_group("win_cinematic")
-		if cine != null and cine.has_method("play_win"):
-			cine.play_win()
-		else:
-			GameState.reach_base()
+	if _has_heat():
 		return
 
-	if _blocked_message_left <= 0.0:
-		GameState.garage_blocked.emit(BLOCKED_MESSAGE)
-		_blocked_message_left = blocked_message_cooldown
+	# Pobeda kad je heat 0 (nema aktivne potere). Cinematic zove reach_base.
+	var cine := get_tree().get_first_node_in_group("win_cinematic")
+	if cine != null and cine.has_method("play_win"):
+		cine.play_win()
+	else:
+		GameState.reach_base()
 
-## Da li te bar JEDAN policajac trenutno VIDI (CHASE/crveno)? Zut (SEARCHING) i
-## siv (RETURNING) ne blokiraju - oni ne znaju gde si.
-func _any_police_chasing() -> bool:
-	for cop in get_tree().get_nodes_in_group(Constants.GROUP_POLICE):
-		if cop.has_method("is_chasing") and cop.is_chasing():
-			return true
-	return false
+## Da li igrac jos ima heat (policija u poteri/pretrazi)?
+func _has_heat() -> bool:
+	return GameState.heat_level > 0
 
 func _draw() -> void:
 	var half := zone_size * 0.5

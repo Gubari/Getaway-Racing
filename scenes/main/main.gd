@@ -7,6 +7,7 @@ extends Node2D
 @onready var _level: Node2D = $City
 @onready var _player: CharacterBody2D = $City/Spawns/PlayerSpawn/Player
 @onready var _garage: Area2D = $City/Spawns/GarageSpawn/Garage
+@onready var _heat_tip: CanvasLayer = $HeatTipMenu
 
 func _ready() -> void:
 	await _setup_camera()
@@ -22,6 +23,7 @@ func _setup_run() -> void:
 	else:
 		GameState.configure_heat_tiers(3, 6, 9)
 	GameState.start_run(starting_loot)
+	_heat_tip.call_deferred("show_intro")
 
 func _setup_camera() -> void:
 	if not _level.has_method("get_arena_rect") or not _player.has_method("setup_camera_limits"):

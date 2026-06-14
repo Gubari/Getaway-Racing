@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://cbasearrow001"]
+
+[ext_resource type="Script" path="res://scenes/ui/base_arrow.gd" id="1"]
+
+[node name="BaseArrow" type="Control"]
+mouse_filter = 2
+script = ExtResource("1")

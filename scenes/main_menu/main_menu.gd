@@ -97,10 +97,11 @@ func _ready() -> void:
 	_build_car_shop()
 	ItemShop.cash_changed.connect(_on_shop_money_changed)
 	ItemShop.unlocks_changed.connect(_refresh_item_shop)
+	ItemShop.equipped_changed.connect(_refresh_item_shop)
 	HeistProgress.heists_changed.connect(_refresh_heist_selection)
 	CarShop.upgrades_changed.connect(_refresh_car_shop)
 	_refresh_shop_money()
-	_show_screen(Screen.HEIST_MAP)
+	_show_screen(Screen.MAIN)
 	Audio.play_main_menu_music()
 
 func _refresh_shop_money() -> void:
@@ -448,6 +449,7 @@ func _refresh_item_shop_selection() -> void:
 func _make_shop_card(entry: Dictionary) -> Control:
 	var card: Card = entry["card"]
 	var owned: bool = entry["owned"]
+	var equipped: bool = entry.get("equipped", false)
 	var price: int = entry["price"]
 	var item_id: StringName = entry["id"]
 
@@ -513,8 +515,12 @@ func _make_shop_card(entry: Dictionary) -> Control:
 	status.add_theme_color_override("font_outline_color", Color(0.04, 0.05, 0.08, 1))
 	status.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if owned:
-		status.text = "Owned"
-		status.add_theme_color_override("font_color", Color(0.55, 0.92, 0.62, 1))
+		if equipped:
+			status.text = "Equipped"
+			status.add_theme_color_override("font_color", Color(0.55, 0.92, 0.62, 1))
+		else:
+			status.text = "Owned"
+			status.add_theme_color_override("font_color", Color(0.75, 0.78, 0.9, 1))
 	elif price <= 0:
 		status.text = "Included"
 		status.add_theme_color_override("font_color", Color(0.75, 0.78, 0.9, 1))
@@ -535,6 +541,19 @@ func _make_shop_card(entry: Dictionary) -> Control:
 				_refresh_item_shop()
 		)
 		vbox.add_child(buy_btn)
+	elif owned:
+		var equip_btn := Button.new()
+		equip_btn.text = "Unequip" if equipped else "Equip"
+		equip_btn.custom_minimum_size = Vector2(88, 34)
+		equip_btn.add_theme_font_size_override("font_size", 17)
+		if not equipped:
+			equip_btn.disabled = not ItemShop.can_equip_more()
+		equip_btn.pressed.connect(func() -> void:
+			if ItemShop.try_toggle_equip(item_id):
+				Audio.play_ui_click()
+				_refresh_item_shop()
+		)
+		vbox.add_child(equip_btn)
 	else:
 		var spacer := Control.new()
 		spacer.custom_minimum_size = Vector2(0, 34)
