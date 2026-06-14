@@ -3,6 +3,8 @@
 [ext_resource type="Script" uid="uid://dg0w81mtrug08" path="res://scenes/ui/hud.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://dctq1ea7f8kuq" path="res://scenes/ui/touch_controls.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/cards/ability_bar.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://day8me5mnlxyd" path="res://scenes/ui/heat_stars.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/ui/loot_display.tscn" id="5"]
 
 [node name="HUD" type="CanvasLayer" unique_id=500711014]
 script = ExtResource("1")
@@ -17,6 +19,7 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="LootLabel" type="Label" parent="Control" unique_id=89691889]
+visible = false
 layout_mode = 0
 offset_left = 16.0
 offset_top = 16.0
@@ -26,7 +29,16 @@ theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
 theme_override_font_sizes/font_size = 24
 text = "Plen: 100k"
 
+[node name="LootDisplay" parent="Control" unique_id=1551942288 instance=ExtResource("5")]
+anchors_preset = 0
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 280.0
+offset_bottom = 50.0
+icon_size = 41.0
+
 [node name="HeatLabel" type="Label" parent="Control" unique_id=1934399484]
+visible = false
 layout_mode = 0
 offset_left = 16.0
 offset_top = 52.0
@@ -35,6 +47,14 @@ offset_bottom = 84.0
 theme_override_colors/font_color = Color(1, 0.45, 0.35, 1)
 theme_override_font_sizes/font_size = 18
 text = "Heat: 0"
+
+[node name="HeatStars" parent="Control" unique_id=301753524 instance=ExtResource("4")]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 60.0
+offset_right = 160.0
+offset_bottom = 92.0
+star_size = 45.0
 
 [node name="WinPanel" type="PanelContainer" parent="Control" unique_id=1362548542]
 visible = false

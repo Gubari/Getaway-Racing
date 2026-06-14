@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/loot_display.gd" id="1"]
+
+[node name="LootDisplay" type="Control"]
+script = ExtResource("1")
+
+[node name="Amount" type="Label" parent="."]
+offset_left = 42.0
+offset_right = 240.0
+offset_bottom = 34.0
