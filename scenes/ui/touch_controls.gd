@@ -44,6 +44,7 @@ const PEDAL_BASE := Color(0.24, 0.24, 0.29)
 var _debug_label: Label
 
 func _ready() -> void:
+	GameState.release_driving_input()
 	_steer_left.action = Constants.INPUT_STEER_LEFT
 	_steer_right.action = Constants.INPUT_STEER_RIGHT
 	_brake.action = Constants.INPUT_BRAKE
@@ -299,6 +300,7 @@ func _setup_debug_label() -> void:
 	_labels_layer.add_child(_debug_label)
 
 func _disable_controls() -> void:
+	GameState.release_driving_input()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for button in [_steer_left, _steer_right, _brake, _gas]:
 		button.action = ""

@@ -70,6 +70,7 @@ func _ready() -> void:
 	nitro_used.connect(func(): lose_loot_percent(LOOT_PENALTY_NITRO))
 
 func start_run(heist_starting_loot: float = 100_000.0) -> void:
+	release_driving_input()
 	starting_loot = maxf(0.0, heist_starting_loot)
 	loot_amount = starting_loot
 	heat_level = 0
@@ -154,13 +155,22 @@ func add_heat(_amount: float) -> void:
 
 func reach_base() -> void:   # pozovi kad igrac stigne do baze
 	is_running = false
+	release_driving_input()
 	game_won.emit()
 
 func caught() -> void:       # pozovi kad policija uhvati igraca
 	is_running = false
+	release_driving_input()
 	loot_amount = 0.0
 	loot_changed.emit(loot_amount)
 	game_over.emit()
 
 func abandon() -> void:      # igrac odustao od pljacke (pause meni)
 	is_running = false
+	release_driving_input()
+
+func release_driving_input() -> void:
+	Input.action_release(Constants.INPUT_GAS)
+	Input.action_release(Constants.INPUT_BRAKE)
+	Input.action_release(Constants.INPUT_STEER_LEFT)
+	Input.action_release(Constants.INPUT_STEER_RIGHT)
