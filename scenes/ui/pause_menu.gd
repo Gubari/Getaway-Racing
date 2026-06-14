@@ -65,6 +65,7 @@ func _toggle_pause() -> void:
 
 func _pause() -> void:
 	get_tree().paused = true
+	Audio.pause_gameplay_audio()
 	_dim.visible = true
 	_pause_panel.visible = true
 	_settings_panel.visible = false
@@ -72,6 +73,7 @@ func _pause() -> void:
 
 func resume() -> void:
 	get_tree().paused = false
+	Audio.resume_gameplay_audio()
 	_close()
 
 func _close() -> void:
