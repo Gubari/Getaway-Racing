@@ -20,6 +20,5 @@ texture = ExtResource("2")
 hframes = 6
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=357124143]
-position_smoothing_enabled = true
-position_smoothing_speed = 10.0
+position_smoothing_enabled = false
 audio_listener_enabled = true
