@@ -71,8 +71,13 @@ func _ready() -> void:
 	ItemShop.unlocks_changed.connect(_refresh_item_shop)
 	HeistProgress.heists_changed.connect(_refresh_heist_selection)
 	CarShop.upgrades_changed.connect(_refresh_car_shop)
+	_refresh_shop_money()
 	_show_screen(Screen.MAIN)
 	Audio.play_main_menu_music()
+
+func _refresh_shop_money() -> void:
+	_item_cash_label.text = "Money: %s" % GameState.format_loot(float(ItemShop.cash))
+	_car_cash_label.text = "Money: %s" % GameState.format_loot(float(ItemShop.cash))
 
 func _input(event: InputEvent) -> void:
 	if not event.is_action_pressed("ui_cancel"):
@@ -93,11 +98,14 @@ func _show_screen(screen: Screen) -> void:
 		_ensure_heist_selection_valid()
 		_refresh_heist_selection()
 	elif screen == Screen.ITEM_SHOP:
+		_refresh_shop_money()
 		_refresh_item_shop()
 	elif screen == Screen.CAR_SHOP:
+		_refresh_shop_money()
 		_refresh_car_shop()
 
 func _on_shop_money_changed(_amount: int) -> void:
+	_refresh_shop_money()
 	_refresh_item_shop()
 	_refresh_car_shop()
 

@@ -81,6 +81,13 @@ func try_spend(amount: int) -> bool:
 	cash_changed.emit(cash)
 	return true
 
+func add_earnings(amount: int) -> void:
+	if amount <= 0:
+		return
+	cash += amount
+	_save()
+	cash_changed.emit(cash)
+
 func get_loadout() -> Array[Card]:
 	var result: Array[Card] = []
 	for item in SHOP_ITEMS:

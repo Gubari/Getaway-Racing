@@ -56,35 +56,6 @@ offset_right = 160.0
 offset_bottom = 92.0
 star_size = 45.0
 
-[node name="WinPanel" type="PanelContainer" parent="Control" unique_id=1362548542]
-visible = false
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -160.0
-offset_top = -60.0
-offset_right = 160.0
-offset_bottom = 60.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="Control/WinPanel" unique_id=1534461940]
-layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 12
-
-[node name="WinLabel" type="Label" parent="Control/WinPanel/MarginContainer" unique_id=434238835]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.3, 1, 0.5, 1)
-theme_override_font_sizes/font_size = 28
-text = "Pobeda!"
-horizontal_alignment = 1
-
 [node name="GameOverPanel" type="PanelContainer" parent="Control" unique_id=928907465]
 visible = false
 layout_mode = 1
@@ -150,3 +121,46 @@ show_input_debug = false
 
 [node name="AbilityBar" parent="Control" unique_id=785047215 instance=ExtResource("3")]
 layout_mode = 1
+
+[node name="WinOverlay" type="VBoxContainer" parent="Control" unique_id=1362548543]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -90.0
+offset_right = 160.0
+offset_bottom = 90.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="WinPanel" type="PanelContainer" parent="Control/WinOverlay" unique_id=1362548542]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="MarginContainer" type="MarginContainer" parent="Control/WinOverlay/WinPanel" unique_id=1534461940]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="WinLabel" type="Label" parent="Control/WinOverlay/WinPanel/MarginContainer" unique_id=434238835]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 28
+text = "Pobeda!"
+horizontal_alignment = 1
+
+[node name="BackToGarageBtn" type="Button" parent="Control/WinOverlay" unique_id=1362548544]
+custom_minimum_size = Vector2(220, 44)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "Back To Garage"
