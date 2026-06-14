@@ -462,6 +462,9 @@ func is_returning() -> bool:
 func is_searching() -> bool:
 	return state == State.SEARCHING
 
+func is_chasing() -> bool:
+	return state == State.CHASE   # crveno: trenutno te VIDI
+
 func is_actively_pursuing() -> bool:
 	return state == State.CHASE or state == State.SEARCHING
 
