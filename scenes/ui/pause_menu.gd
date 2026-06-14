@@ -22,21 +22,16 @@ const MIN_DB := -40.0   # ispod ovoga = potpuna tisina (mute)
 
 var _music_bus := -1
 var _sfx_bus := -1
-var _click: AudioStreamPlayer
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_music_bus = AudioServer.get_bus_index("Music")
 	_sfx_bus = AudioServer.get_bus_index("SFX")
+	if _music_bus < 0 or _sfx_bus < 0:
+		push_warning("PauseMenu: Music/SFX audio bus nije pronadjen — proveri project.godot [audio].")
 
-	_click = AudioStreamPlayer.new()
-	_click.stream = load("res://assets/audio/sfx/ui_click.wav")
-	_click.bus = "SFX"
-	add_child(_click)
-
-	for b: Button in [_resume_btn, _settings_btn, _abandon_btn, _return_btn]:
-		b.pressed.connect(_click.play)
-
+	# UI klik zvuk vise nije ovde - globalni Audio autoload ga svira na svako
+	# dugme automatski (vidi scripts/audio.gd).
 	_resume_btn.pressed.connect(resume)
 	_settings_btn.pressed.connect(_open_settings)
 	_abandon_btn.pressed.connect(_abandon)
@@ -105,6 +100,7 @@ func _close_settings() -> void:
 
 func _abandon() -> void:
 	GameState.abandon()
+	Audio.stop_heist_music()
 	get_tree().paused = false
 	get_tree().reload_current_scene()
 

@@ -15,6 +15,10 @@ var heat_level: int = 0               # 0 = mir, 1-4 = vise policije u poteri
 var heat_blink_active: bool = false   # true kad bar jedna policija pretrazuje (SEARCHING)
 var is_running: bool = false      # da li trka trenutno traje
 
+# Muzika heista prati najintenzivniji police state (CHASE > SEARCHING > RETURNING).
+enum PursuitMusic { RETURNING, SEARCHING, CHASING }
+var pursuit_music: int = PursuitMusic.CHASING
+
 # Pragovi broja vozila u CHASE/SEARCHING -> heat nivo (podesava level).
 var _heat_tier_1_max: int = 3
 var _heat_tier_2_max: int = 6
@@ -45,6 +49,7 @@ signal garage_blocked(message: String)   # D slusa za HUD poruku; emituje Garage
 signal loot_changed(value: float)    # D slusa za HUD (apsolutni iznos)
 signal heat_changed(level: int)    # 0-4, D slusa za HUD
 signal heat_blink_changed(active: bool)  # treperi kad je policija u SEARCHING
+signal pursuit_music_changed(mode: int)  # D/Audio slusa za heist muziku
 signal game_won
 signal game_over
 
@@ -69,17 +74,33 @@ func start_run(heist_starting_loot: float = 100_000.0) -> void:
 	heat_level = 0
 	heat_blink_active = false
 	is_running = true
+	pursuit_music = PursuitMusic.CHASING
 	loot_changed.emit(loot_amount)
 	heat_changed.emit(heat_level)
 	heat_blink_changed.emit(heat_blink_active)
+	pursuit_music_changed.emit(pursuit_music)
 
 func update_heat_from_police(pursuit_count: int, searching_count: int) -> void:
 	set_heat_from_pursuit_count(pursuit_count)
 	var blink := searching_count > 0
-	if blink == heat_blink_active:
+	if blink != heat_blink_active:
+		heat_blink_active = blink
+		heat_blink_changed.emit(heat_blink_active)
+	_update_pursuit_music(pursuit_count, searching_count)
+
+func _update_pursuit_music(pursuit_count: int, searching_count: int) -> void:
+	if not is_running:
 		return
-	heat_blink_active = blink
-	heat_blink_changed.emit(heat_blink_active)
+	var chase_count := pursuit_count - searching_count
+	var mode := PursuitMusic.RETURNING
+	if chase_count > 0:
+		mode = PursuitMusic.CHASING
+	elif searching_count > 0:
+		mode = PursuitMusic.SEARCHING
+	if mode == pursuit_music:
+		return
+	pursuit_music = mode
+	pursuit_music_changed.emit(pursuit_music)
 
 func configure_heat_tiers(tier_1_max_cars: int, tier_2_max_cars: int, tier_3_max_cars: int) -> void:
 	_heat_tier_1_max = maxi(1, tier_1_max_cars)

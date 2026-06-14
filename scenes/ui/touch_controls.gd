@@ -41,7 +41,6 @@ const PEDAL_BASE := Color(0.24, 0.24, 0.29)
 @onready var _gas: TouchScreenButton = $GasButton
 @onready var _labels_layer: Control = $LabelsLayer
 
-var _click_player: AudioStreamPlayer
 var _debug_label: Label
 
 func _ready() -> void:
@@ -53,12 +52,6 @@ func _ready() -> void:
 	for button in [_steer_left, _steer_right, _brake, _gas]:
 		button.visibility_mode = TouchScreenButton.VISIBILITY_ALWAYS
 		button.passby_press = false
-		_wire_feedback(button)
-
-	_click_player = AudioStreamPlayer.new()
-	_click_player.stream = load("res://assets/audio/sfx/ui_click.wav")
-	_click_player.bus = "SFX"
-	add_child(_click_player)
 
 	if show_input_debug:
 		_setup_debug_label()
@@ -304,18 +297,6 @@ func _setup_debug_label() -> void:
 	_debug_label.add_theme_font_size_override("font_size", 13)
 	_debug_label.add_theme_color_override("font_color", Color(0.7, 1.0, 0.7, 0.9))
 	_labels_layer.add_child(_debug_label)
-
-func _wire_feedback(button: TouchScreenButton) -> void:
-	button.pressed.connect(_on_touch_pressed)
-	button.released.connect(_on_touch_released)
-
-func _on_touch_pressed() -> void:
-	if not GameState.is_running:
-		return
-	_click_player.play()
-
-func _on_touch_released() -> void:
-	pass
 
 func _disable_controls() -> void:
 	for button in [_steer_left, _steer_right, _brake, _gas]:

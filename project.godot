@@ -18,6 +18,11 @@ config/icon="res://icon.svg"
 [autoload]
 
 GameState="*res://scripts/game_state.gd"
+Audio="*res://scripts/audio.gd"
+
+[audio]
+
+buses/default_bus_layout="res://default_bus_layout.tres"
 
 [display]
 
