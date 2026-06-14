@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="Card" load_steps=4 format=3 uid="uid://cspikes001"]
+[gd_resource type="Resource" script_class="Card" format=3 uid="uid://cspikes001"]
 
 [ext_resource type="Script" uid="uid://dpcyx122u6xpl" path="res://scenes/cards/card.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/cards/spikes.tscn" id="2"]

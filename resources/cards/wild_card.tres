@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="Card" load_steps=3 format=3 uid="uid://cld0pd2oeeik7"]
+[gd_resource type="Resource" script_class="Card" format=3 uid="uid://cld0pd2oeeik7"]
 
 [ext_resource type="Script" uid="uid://dpcyx122u6xpl" path="res://scenes/cards/card.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/cards/wild_card.png" id="2"]
