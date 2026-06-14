@@ -179,6 +179,28 @@ offset_bottom = 75.0
 text = "Settings"
 icon = ExtResource("5")
 
+[node name="TitleLogo" type="RichTextLabel" parent="MainPanel" unique_id=1900730045]
+texture_filter = 1
+layout_mode = 0
+offset_left = 320.0
+offset_top = 28.0
+offset_right = 960.0
+offset_bottom = 232.0
+mouse_filter = 2
+theme_override_colors/default_color = Color(0.92, 0.94, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.5)
+theme_override_colors/font_outline_color = Color(0.04, 0.05, 0.08, 1)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 5
+theme_override_constants/outline_size = 9
+theme_override_font_sizes/normal_font_size = 64
+bbcode_enabled = true
+text = "[center][font_size=78][color=#ebf0ff]GETAWAY[/color][/font_size]
+[font_size=66][color=#d9a521]RACER[/color][/font_size][/center]"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+
 [node name="HeistMapPanel" type="CenterContainer" parent="." unique_id=1505023272]
 visible = false
 texture_filter = 1
