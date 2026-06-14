@@ -299,6 +299,7 @@ func _setup_debug_label() -> void:
 	_labels_layer.add_child(_debug_label)
 
 func _disable_controls() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for button in [_steer_left, _steer_right, _brake, _gas]:
 		button.action = ""
 		button.visible = false

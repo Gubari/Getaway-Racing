@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3 uid="uid://cnavregion001"]
 
 [ext_resource type="Script" path="res://scenes/levels/nav_region_runtime.gd" id="1"]
+[ext_resource type="NavigationPolygon" path="res://scenes/levels/city_navmesh.tres" id="2_nav"]
 
 [node name="NavRegion" type="NavigationRegion2D"]
+navigation_polygon = ExtResource("2_nav")
 script = ExtResource("1")
+bake_on_ready = false
