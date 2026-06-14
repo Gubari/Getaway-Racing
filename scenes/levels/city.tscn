@@ -985,7 +985,7 @@ script = ExtResource("8_spawner")
 police_scene = ExtResource("6_police")
 
 [node name="GarageSpawn" type="Marker2D" parent="Spawns" unique_id=1896010546]
-position = Vector2(239, 439)
+position = Vector2(239, 185)
 
 [node name="Garage" parent="Spawns/GarageSpawn" unique_id=1228052125 instance=ExtResource("7_garage")]
 zone_size = Vector2(100, 150)
