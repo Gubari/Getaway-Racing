@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://bs6cx6qidvykb" path="res://scenes/police/police.tscn" id="6_police"]
 [ext_resource type="PackedScene" path="res://scenes/levels/garage.tscn" id="7_garage"]
 [ext_resource type="Script" uid="uid://bpsdlya2a5tir" path="res://scenes/police/police_spawner.gd" id="8_spawner"]
+[ext_resource type="Script" uid="uid://d17wtxr82bltp" path="res://scenes/levels/heist_profile.gd" id="9_heist"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4hfmj"]
 atlas = ExtResource("2_ukbxt")
@@ -287,10 +288,70 @@ animations = [{
 
 [node name="City" type="Node2D" unique_id=469356642]
 script = ExtResource("4_city")
-starting_loot = 1200000.0
-heat_tier_1_max_cars = 2
-heat_tier_2_max_cars = 3
-heat_tier_3_max_cars = 5
+
+[node name="HeistProfiles" type="Node2D" parent="." unique_id=1847293650]
+
+[node name="downtown" type="Node2D" parent="HeistProfiles" unique_id=1847293651]
+script = ExtResource("9_heist")
+heist_id = "downtown"
+display_name = "Downtown Vault"
+starting_loot = 800000.0
+heat_tier_3_max_cars = 4
+max_police = 4
+first_spawn_delay = 1.5
+spawn_interval = 14.0
+
+[node name="PlayerSpawn" type="Marker2D" parent="HeistProfiles/downtown" unique_id=1847293652]
+position = Vector2(1160, 997)
+
+[node name="PoliceSpawnerSpawn" type="Marker2D" parent="HeistProfiles/downtown" unique_id=1847293653]
+position = Vector2(1393, 274)
+
+[node name="GarageSpawn" type="Marker2D" parent="HeistProfiles/downtown" unique_id=1847293654]
+position = Vector2(239, 439)
+
+[node name="port" type="Node2D" parent="HeistProfiles" unique_id=1847293660]
+script = ExtResource("9_heist")
+heist_id = "port"
+display_name = "Port Warehouse"
+starting_loot = 1500000.0
+heat_tier_2_max_cars = 4
+heat_tier_3_max_cars = 6
+max_police = 6
+spawn_interval = 11.0
+
+[node name="PlayerSpawn" type="Marker2D" parent="HeistProfiles/port" unique_id=1847293661]
+position = Vector2(2060, 2003)
+rotation = -0.028841019
+
+[node name="PoliceSpawnerSpawn" type="Marker2D" parent="HeistProfiles/port" unique_id=1847293662]
+position = Vector2(1956.0002, 1130)
+rotation = 3.1303415
+
+[node name="GarageSpawn" type="Marker2D" parent="HeistProfiles/port" unique_id=1847293663]
+position = Vector2(239, 444)
+
+[node name="industrial" type="Node2D" parent="HeistProfiles" unique_id=1847293670]
+script = ExtResource("9_heist")
+heist_id = "industrial"
+display_name = "Industrial Yard"
+starting_loot = 2100000.0
+heat_tier_1_max_cars = 3
+heat_tier_2_max_cars = 5
+heat_tier_3_max_cars = 8
+max_police = 8
+first_spawn_delay = 0.8
+spawn_interval = 9.0
+
+[node name="PlayerSpawn" type="Marker2D" parent="HeistProfiles/industrial" unique_id=1847293671]
+position = Vector2(3591, 1370)
+
+[node name="PoliceSpawnerSpawn" type="Marker2D" parent="HeistProfiles/industrial" unique_id=1847293672]
+position = Vector2(4163, 1915)
+rotation = -1.5244312
+
+[node name="GarageSpawn" type="Marker2D" parent="HeistProfiles/industrial" unique_id=1847293673]
+position = Vector2(3400, 650)
 
 [node name="Spawns" type="Node2D" parent="." unique_id=925044423]
 

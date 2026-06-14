@@ -1,33 +1,74 @@
 extends Node2D
 ## City mapa. Tile kolizije moraju biti u grupi "walls" da player skida plen.
-## Spawn: u editoru pomeri Spawns/*Spawn markere (Player/Garage/PoliceSpawner su deca).
-## Policija dolazi iskljucivo iz PoliceSpawnerSpawn (PoliceSpawner).
+## Pljacke: HeistProfiles/* (podesi markere + loot/heat). GameState.selected_heist_id bira profil.
 
 ## Layeri sa fizickom kolizijom + grupa "walls" (player skida plen na sudar).
 const WALL_LAYER_NAMES: Array[StringName] = [&"Outline", &"Sidewalk", &"Buildings"]
 ## Dekorativni delovi zgrada koji visi preko puta — bez kolizije, ali ispred auta.
 const CANOPY_LAYER_NAMES: Array[StringName] = [&"BuildingNonColide"]
 
-@export_group("Heist")
-@export var starting_loot: float = 100_000.0
-
-@export_group("Heat")
-## Max broj vozila u poteri za heat 1/2/3. Preko tier 3 -> heat 4.
-@export var heat_tier_1_max_cars: int = 3
-@export var heat_tier_2_max_cars: int = 6
-@export var heat_tier_3_max_cars: int = 9
+const DEFAULT_HEIST_ID := &"downtown"
 
 @export_group("Camera / Map Bounds")
-## Granice kamere — kamera ne vidi van ovog pravougaonika.
-## Auto: spaja Road/Sidewalk/Buildings (Outline ima off-map tile-ove van igre).
 @export var camera_bounds_from_outline: bool = true
 @export var camera_bounds_padding: Vector2 = Vector2.ZERO
-## Rucno ako auto nije ukljucen ili Outline nije popunjen.
 @export var arena_rect: Rect2 = Rect2(0, 0, 4480, 1536)
+
+var _active_profile: HeistProfile
+
+@onready var _player_spawn: Marker2D = $Spawns/PlayerSpawn
+@onready var _police_spawn: Marker2D = $Spawns/PoliceSpawnerSpawn
+@onready var _garage_spawn: Marker2D = $Spawns/GarageSpawn
+@onready var _police_spawner: Node2D = $Spawns/PoliceSpawnerSpawn/PoliceSpawner
+@onready var _heist_profiles: Node2D = $HeistProfiles
 
 func _ready() -> void:
 	_setup_wall_layers()
 	_setup_canopy_depth()
+	_apply_selected_heist()
+
+func _apply_selected_heist() -> void:
+	var heist_id := StringName(GameState.selected_heist_id)
+	if heist_id.is_empty():
+		heist_id = DEFAULT_HEIST_ID
+	_active_profile = _find_profile(heist_id)
+	if _active_profile == null:
+		push_warning("City: unknown heist '%s', using first profile." % heist_id)
+		for child in _heist_profiles.get_children():
+			if child is HeistProfile:
+				_active_profile = child as HeistProfile
+				break
+	if _active_profile == null:
+		return
+	_player_spawn.position = _active_profile.get_player_spawn_position()
+	_police_spawn.position = _active_profile.get_police_spawner_position()
+	_garage_spawn.position = _active_profile.get_garage_spawn_position()
+	_police_spawner.first_spawn_delay = _active_profile.first_spawn_delay
+	_police_spawner.spawn_interval = _active_profile.spawn_interval
+
+func _find_profile(heist_id: StringName) -> HeistProfile:
+	for child in _heist_profiles.get_children():
+		if child is HeistProfile and StringName(child.heist_id) == heist_id:
+			return child as HeistProfile
+	return null
+
+func get_active_heist_id() -> String:
+	return _active_profile.heist_id if _active_profile != null else String(DEFAULT_HEIST_ID)
+
+func get_starting_loot() -> float:
+	if _active_profile != null:
+		return _active_profile.starting_loot
+	return 100_000.0
+
+func get_heat_tier_maxes() -> Vector3i:
+	if _active_profile != null:
+		return _active_profile.get_heat_tier_maxes()
+	return Vector3i(2, 3, 5)
+
+func get_max_police() -> int:
+	if _active_profile != null:
+		return _active_profile.max_police
+	return 5
 
 func _setup_wall_layers() -> void:
 	for child in get_children():
@@ -46,12 +87,6 @@ func _setup_canopy_depth() -> void:
 			child.z_as_relative = false
 			child.z_index = Constants.DEPTH_CANOPY_Z_INDEX
 			child.y_sort_enabled = true
-
-func get_starting_loot() -> float:
-	return starting_loot
-
-func get_heat_tier_maxes() -> Vector3i:
-	return Vector3i(heat_tier_1_max_cars, heat_tier_2_max_cars, heat_tier_3_max_cars)
 
 const CAMERA_BOUNDS_LAYERS: Array[StringName] = [
 	&"Road", &"Sidewalk", &"Buildings",

@@ -34,12 +34,18 @@ var _template: Dictionary = {}
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
+	call_deferred("_setup_from_level")
+
+func _setup_from_level() -> void:
 	_timer = first_spawn_delay
 	var level := _find_level()
 	if level != null:
 		var maxes: Vector3i = level.get_heat_tier_maxes()
 		GameState.configure_heat_tiers(maxes.x, maxes.y, maxes.z)
-		_cap = maxes.z
+		if level.has_method("get_max_police"):
+			_cap = level.get_max_police()
+		else:
+			_cap = maxes.z
 	else:
 		_cap = fallback_max
 	_build_template()

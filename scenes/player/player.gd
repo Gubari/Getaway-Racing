@@ -41,8 +41,8 @@ extends CharacterBody2D
 
 @export_group("Feel")
 @export var steer_tilt_max_deg: float = 10.0
-@export var speed_zoom_out_amount: float = 0.08
-@export var brake_zoom_in_amount: float = 0.05
+@export var speed_zoom_out_amount: float = 0.088
+@export var brake_zoom_in_amount: float = 0.055
 @export var brake_anim_fps: float = 6.0
 @export var feel_zoom_smoothing: float = 10.0
 
@@ -222,9 +222,11 @@ func _get_speed_cap() -> float:
 	return max_speed
 
 func _compute_driving_zoom_multiplier(throttle: float, speed_cap: float) -> float:
-	var speed_ratio := clampf(absf(_drive.get_forward_speed()) / speed_cap, 0.0, 1.0)
+	var forward_speed := _drive.get_forward_speed()
+	var speed_ratio := clampf(absf(forward_speed) / speed_cap, 0.0, 1.0)
 	var zoom_mult := 1.0 - speed_zoom_out_amount * speed_ratio
-	if throttle < 0.0 and _drive.get_forward_speed() > 5.0:
+	# Kočnica napred ili rikverc — isti zoom-in (dok ima značajnog kretanja).
+	if throttle < 0.0 and absf(forward_speed) > 5.0:
 		zoom_mult += brake_zoom_in_amount * absf(throttle)
 	return zoom_mult
 

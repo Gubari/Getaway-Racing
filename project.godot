@@ -21,6 +21,8 @@ GameState="*res://scripts/game_state.gd"
 Audio="*res://scripts/audio.gd"
 ItemShop="*res://scripts/item_shop.gd"
 CarShop="*res://scripts/car_shop.gd"
+HeistProgress="*res://scripts/heist_progress.gd"
+HeistCatalog="*res://scripts/heist_catalog.gd"
 
 [display]
 
