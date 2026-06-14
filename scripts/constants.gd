@@ -11,6 +11,10 @@ const GROUP_POLICE := "police"
 const GROUP_WALLS := "walls"
 const GROUP_GARAGE := "garage"
 
+# --- RENDER DUBINA (top-down Y sort + krov/senice iznad vozila) ---
+## TileMapLayer bez kolizije (krov, nadstrešnica) — uvek iznad vozila.
+const DEPTH_CANOPY_Z_INDEX := 4096
+
 # --- COLLISION LAYER VREDNOSTI (bitmask) ---
 # Project Settings -> Layer Names -> 2D Physics mora da se poklapa:
 #   layer 1 = player, layer 2 = police, layer 3 = walls, layer 4 = card_effects

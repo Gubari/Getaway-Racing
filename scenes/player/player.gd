@@ -36,6 +36,9 @@ extends CharacterBody2D
 @export var car_anim_fps: float = 14.0
 @export var car_anim_frames: int = 6
 
+@export_group("Depth")
+@export var depth_sort_y_offset: float = 10.0
+
 @export_group("Feel")
 @export var steer_tilt_max_deg: float = 10.0
 @export var speed_zoom_out_amount: float = 0.08
@@ -69,17 +72,21 @@ var _camera_base_zoom: Vector2 = Vector2.ONE
 var _driving_zoom: Vector2 = Vector2.ONE
 var _car_anim_accum: float = 0.0
 var _last_throttle: float = 0.0
+var _arena_rect: Rect2 = Rect2()
+var _last_camera_zoom: Vector2 = Vector2.ONE
 
 @onready var _camera: Camera2D = $Camera2D
 @onready var _car_sprite: Sprite2D = $CarSprite
 
 func _ready() -> void:
 	add_to_group(Constants.GROUP_PLAYER)
+	z_as_relative = false
 	GameState.card_played.connect(_on_card_played)
 	_prev_rotation = rotation
 	_camera_base_zoom = _camera.zoom
 	_driving_zoom = _camera_base_zoom
 	_camera.make_current()
+	get_viewport().size_changed.connect(_on_viewport_size_changed)
 	_sync_drive_params()
 	_update_car_sprite()
 
@@ -101,11 +108,28 @@ func _sync_drive_params() -> void:
 	_drive.crash_steer_lock_sec = crash_steer_lock_sec
 
 func setup_camera_limits(arena: Rect2) -> void:
-	_camera.limit_left = int(arena.position.x)
-	_camera.limit_top = int(arena.position.y)
-	_camera.limit_right = int(arena.position.x + arena.size.x)
-	_camera.limit_bottom = int(arena.position.y + arena.size.y)
-	_camera.limit_smoothed = true
+	_arena_rect = arena
+	_apply_camera_limits()
+
+func _on_viewport_size_changed() -> void:
+	_apply_camera_limits()
+
+func _apply_camera_limits() -> void:
+	if _arena_rect.size == Vector2.ZERO:
+		return
+	_camera.limit_enabled = true
+	_camera.limit_smoothed = false
+	_camera.limit_left = int(_arena_rect.position.x)
+	_camera.limit_top = int(_arena_rect.position.y)
+	_camera.limit_right = int(_arena_rect.position.x + _arena_rect.size.x)
+	_camera.limit_bottom = int(_arena_rect.position.y + _arena_rect.size.y)
+	_camera.force_update_scroll()
+
+func _maybe_refresh_camera_limits() -> void:
+	if _camera.zoom.is_equal_approx(_last_camera_zoom):
+		return
+	_last_camera_zoom = _camera.zoom
+	_apply_camera_limits()
 
 func _physics_process(delta: float) -> void:
 	if not GameState.is_running:
@@ -137,9 +161,13 @@ func _process(delta: float) -> void:
 		_sharp_turn_cooldown_left = maxf(0.0, _sharp_turn_cooldown_left - delta)
 	if _crash_juice_time_left > 0.0:
 		_crash_juice_time_left = maxf(0.0, _crash_juice_time_left - delta)
+	_update_depth_sort()
 	_update_car_sprite(delta)
 	_update_camera_effects(delta)
 	_update_engine_audio(delta)
+
+func _update_depth_sort() -> void:
+	z_index = int(global_position.y + depth_sort_y_offset)
 
 func _update_engine_audio(delta: float) -> void:
 	if not GameState.is_running:
@@ -193,11 +221,13 @@ func _update_camera_effects(delta: float) -> void:
 		_camera.offset = impulse + jitter
 		_driving_zoom = _driving_zoom.lerp(target_zoom, feel_zoom_smoothing * delta)
 		_camera.zoom = _driving_zoom * (1.0 + crash_zoom_punch * t)
+		_maybe_refresh_camera_limits()
 		return
 
 	_camera.offset = Vector2.ZERO
 	_driving_zoom = _driving_zoom.lerp(target_zoom, feel_zoom_smoothing * delta)
 	_camera.zoom = _driving_zoom
+	_maybe_refresh_camera_limits()
 
 func _get_throttle() -> float:
 	var throttle := (
