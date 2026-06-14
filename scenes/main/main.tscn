@@ -12,6 +12,7 @@
 [ext_resource type="Resource" uid="uid://p3dmeg04qw3b" path="res://resources/cards/barikada.tres" id="12"]
 [ext_resource type="Script" uid="uid://c28ie1r8puq7l" path="res://scenes/effects/loot_burst.gd" id="14"]
 [ext_resource type="PackedScene" path="res://scenes/effects/coin.tscn" id="15"]
+[ext_resource type="Script" path="res://scenes/effects/win_cinematic.gd" id="16"]
 
 [node name="Main" type="Node2D" unique_id=1089452316]
 script = ExtResource("1")
@@ -30,3 +31,6 @@ abilities = Array[ExtResource("8_th5th")]([ExtResource("10"), ExtResource("11"),
 [node name="HUD" parent="." unique_id=118646500 instance=ExtResource("5")]
 
 [node name="PauseMenu" parent="." unique_id=135400845 instance=ExtResource("8")]
+
+[node name="WinCinematic" type="Node" parent="."]
+script = ExtResource("16")

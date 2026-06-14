@@ -4,7 +4,7 @@ extends NavigationRegion2D
 ## Podrzava rebake() (grupa "nav_region") za barikadu (moc).
 ## Radi u bilo kom nivou koji ima get_arena_rect(). Vlasnik: B (glue za AI).
 
-@export var agent_radius: float = 26.0
+@export var agent_radius: float = 22.0   # pola sirine auta + margina; uze ulice su ~96px
 @export var fallback_area: Rect2 = Rect2(0, 0, 2048, 2048)
 
 func _ready() -> void:
@@ -18,19 +18,23 @@ func rebake() -> void:
 
 func _bake() -> void:
 	var area := _find_arena()
-
-	var np := NavigationPolygon.new()
-	np.agent_radius = agent_radius
-	np.parsed_geometry_type = NavigationPolygon.PARSED_GEOMETRY_STATIC_COLLIDERS
-	np.add_outline(PackedVector2Array([
+	var outline := PackedVector2Array([
 		area.position,
 		Vector2(area.end.x, area.position.y),
 		area.end,
 		Vector2(area.position.x, area.end.y),
-	]))
+	])
+
+	var np := NavigationPolygon.new()
+	np.agent_radius = agent_radius
+	np.parsed_geometry_type = NavigationPolygon.PARSED_GEOMETRY_STATIC_COLLIDERS
+	# Parsiraj SAMO slojeve u grupi "walls" (Sidewalk/Buildings/Outline) -> Road ostaje vozan.
+	np.source_geometry_mode = NavigationPolygon.SOURCE_GEOMETRY_GROUPS_WITH_CHILDREN
+	np.source_geometry_group_name = &"walls"
 
 	var src := NavigationMeshSourceGeometryData2D.new()
 	NavigationServer2D.parse_source_geometry_data(np, src, get_tree().current_scene)
+	src.add_traversable_outline(outline)   # KLJUC: arena = prohodna podloga (iz koje se sece kolizija)
 	NavigationServer2D.bake_from_source_geometry_data(np, src)
 	navigation_polygon = np
 
