@@ -4,8 +4,8 @@
 [ext_resource type="Texture2D" uid="uid://c7hwseck3g4o1" path="res://assets/sprites/tiles/3_City_Props_32x32.png" id="2_ukbxt"]
 [ext_resource type="Texture2D" uid="uid://cyirxk5w3n8f8" path="res://assets/sprites/tiles/Condo_6_Garage_Door_32x32.png" id="3_4hfmj"]
 [ext_resource type="Script" uid="uid://0mrh4g8qm4c" path="res://scenes/levels/city.gd" id="4_city"]
-[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="5_player"]
-[ext_resource type="PackedScene" path="res://scenes/police/police.tscn" id="6_police"]
+[ext_resource type="PackedScene" uid="uid://bcesjo4k441x7" path="res://scenes/player/player.tscn" id="5_player"]
+[ext_resource type="PackedScene" uid="uid://bs6cx6qidvykb" path="res://scenes/police/police.tscn" id="6_police"]
 [ext_resource type="PackedScene" path="res://scenes/levels/garage.tscn" id="7_garage"]
 [ext_resource type="Script" uid="uid://bpsdlya2a5tir" path="res://scenes/police/police_spawner.gd" id="8_spawner"]
 [ext_resource type="Script" uid="uid://d17wtxr82bltp" path="res://scenes/levels/heist_profile.gd" id="9_heist"]
@@ -1036,7 +1036,7 @@ texture_filter = 1
 position = Vector2(1849, 873)
 sprite_frames = SubResource("SpriteFrames_wyqnf")
 autoplay = "default"
-frame_progress = 0.80402344
+frame_progress = 0.14113829
 
 [node name="Buildings" type="TileMapLayer" parent="." unique_id=885884444]
 texture_filter = 1
@@ -1068,7 +1068,7 @@ position = Vector2(1250, 408.00003)
 scale = Vector2(2.0225, 2.0225)
 sprite_frames = SubResource("SpriteFrames_ms61e")
 autoplay = "default"
-frame_progress = 0.03799644
+frame_progress = 0.060502473
 
 [node name="AlexSouth" type="AnimatedSprite2D" parent="." unique_id=69343937]
 texture_filter = 1
@@ -1076,7 +1076,7 @@ position = Vector2(240.00002, 565)
 scale = Vector2(2.0625, 2.0625)
 sprite_frames = SubResource("SpriteFrames_i5wo2")
 autoplay = "default"
-frame_progress = 0.6386395
+frame_progress = 0.6611451
 
 [node name="BobSouth" type="AnimatedSprite2D" parent="." unique_id=413621536]
 texture_filter = 1
@@ -1084,7 +1084,7 @@ position = Vector2(1904, 922)
 scale = Vector2(2.0026898, 2.0026898)
 sprite_frames = SubResource("SpriteFrames_exl8k")
 autoplay = "default"
-frame_progress = 0.4518166
+frame_progress = 0.47431755
 
 [node name="AmeliaNorth" type="AnimatedSprite2D" parent="." unique_id=759207829]
 texture_filter = 1
@@ -1092,7 +1092,7 @@ position = Vector2(479.00018, 898)
 scale = Vector2(2.0225, 2.0225)
 sprite_frames = SubResource("SpriteFrames_oumyh")
 autoplay = "default"
-frame_progress = 0.9690808
+frame_progress = 0.99158853
 
 [node name="AmeliaEast" type="AnimatedSprite2D" parent="." unique_id=1551481105]
 texture_filter = 1
@@ -1100,7 +1100,7 @@ position = Vector2(973, 908)
 scale = Vector2(2.0225, 2.0225)
 sprite_frames = SubResource("SpriteFrames_tcghi")
 autoplay = "default"
-frame_progress = 0.5543358
+frame_progress = 0.576841
 
 [node name="AmeliaWest" type="AnimatedSprite2D" parent="." unique_id=401997689]
 texture_filter = 1
@@ -1108,7 +1108,7 @@ position = Vector2(1134, 562)
 scale = Vector2(2.0225, 2.0225)
 sprite_frames = SubResource("SpriteFrames_rqgyx")
 autoplay = "default"
-frame_progress = 0.2605022
+frame_progress = 0.2830023
 
 [node name="AlexNorth" type="AnimatedSprite2D" parent="." unique_id=954022599]
 texture_filter = 1
@@ -1116,7 +1116,7 @@ position = Vector2(479, 901)
 scale = Vector2(2.0625, 2.0625)
 sprite_frames = SubResource("SpriteFrames_no6oi")
 autoplay = "default"
-frame_progress = 0.14228837
+frame_progress = 0.16479097
 
 [node name="AlexEast" type="AnimatedSprite2D" parent="." unique_id=114738584]
 texture_filter = 1
@@ -1124,7 +1124,7 @@ position = Vector2(479.00003, 633)
 scale = Vector2(2.0625, 2.0625)
 sprite_frames = SubResource("SpriteFrames_7e6ri")
 autoplay = "default"
-frame_progress = 0.14067726
+frame_progress = 0.16317986
 
 [node name="AlexWest" type="AnimatedSprite2D" parent="." unique_id=2140356113]
 texture_filter = 1
@@ -1132,7 +1132,7 @@ position = Vector2(1518.0001, 875)
 scale = Vector2(2.0625, 2.0625)
 sprite_frames = SubResource("SpriteFrames_olts8")
 autoplay = "default"
-frame_progress = 0.65667796
+frame_progress = 0.6791837
 
 [node name="BobEast" type="AnimatedSprite2D" parent="." unique_id=100895908]
 texture_filter = 1
@@ -1140,7 +1140,7 @@ position = Vector2(254, 689)
 scale = Vector2(2.0026898, 2.0026898)
 sprite_frames = SubResource("SpriteFrames_q51of")
 autoplay = "default"
-frame_progress = 0.97583884
+frame_progress = 0.99834675
 
 [node name="BobNorth" type="AnimatedSprite2D" parent="." unique_id=1230408031]
 texture_filter = 1
@@ -1148,7 +1148,7 @@ position = Vector2(1216, 1177)
 scale = Vector2(2.0026898, 2.0026898)
 sprite_frames = SubResource("SpriteFrames_0y3g6")
 autoplay = "default"
-frame_progress = 0.47242203
+frame_progress = 0.49492335
 
 [node name="BobWest" type="AnimatedSprite2D" parent="." unique_id=425145610]
 texture_filter = 1
@@ -1156,7 +1156,7 @@ position = Vector2(718, 405)
 scale = Vector2(2.0026898, 2.0026898)
 sprite_frames = SubResource("SpriteFrames_vf43e")
 autoplay = "default"
-frame_progress = 0.7072589
+frame_progress = 0.7297652
 
 [node name="AmeliaSouth2" type="AnimatedSprite2D" parent="." unique_id=54533472]
 texture_filter = 1
@@ -1164,7 +1164,7 @@ position = Vector2(2700.0002, 1564.0001)
 scale = Vector2(2.0225, 2.0225)
 sprite_frames = SubResource("SpriteFrames_ms61e")
 autoplay = "default"
-frame_progress = 0.929695
+frame_progress = 0.95220095
 
 [node name="AlexSouth2" type="AnimatedSprite2D" parent="." unique_id=1270068793]
 texture_filter = 1
@@ -1172,7 +1172,7 @@ position = Vector2(1963, 1976)
 scale = Vector2(2.0625, 2.0625)
 sprite_frames = SubResource("SpriteFrames_i5wo2")
 autoplay = "default"
-frame_progress = 0.23533794
+frame_progress = 0.25783768
 
 [node name="BobSouth2" type="AnimatedSprite2D" parent="." unique_id=1487986445]
 texture_filter = 1
@@ -1180,7 +1180,7 @@ position = Vector2(3433.9998, 1977.9999)
 scale = Vector2(2.0026898, 2.0026898)
 sprite_frames = SubResource("SpriteFrames_exl8k")
 autoplay = "default"
-frame_progress = 0.3279306
+frame_progress = 0.35042942
 
 [node name="AmeliaNorth2" type="AnimatedSprite2D" parent="." unique_id=45889143]
 texture_filter = 1
