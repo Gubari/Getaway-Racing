@@ -13,6 +13,7 @@
 [ext_resource type="Resource" uid="uid://bud036g1grhwj" path="res://resources/cards/ulje.tres" id="10"]
 [ext_resource type="Resource" uid="uid://pw0lr6j6l6o8" path="res://resources/cards/nitro.tres" id="11"]
 [ext_resource type="Resource" uid="uid://p3dmeg04qw3b" path="res://resources/cards/barikada.tres" id="12"]
+[ext_resource type="Script" path="res://scenes/police/police_spawner.gd" id="13"]
 
 [node name="Main" type="Node2D" unique_id=1089452316]
 script = ExtResource("1")
@@ -39,6 +40,11 @@ search_speed = 250.0
 return_speed = 150.0
 lose_sight_grace = 4.0
 wall_crash_enabled = false
+
+[node name="PoliceSpawner" type="Node2D" parent="."]
+position = Vector2(150, 200)
+script = ExtResource("13")
+police_scene = ExtResource("3")
 
 [node name="Garage" parent="." unique_id=1636931700 instance=ExtResource("7")]
 position = Vector2(1306, 803)

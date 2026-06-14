@@ -28,14 +28,20 @@ func _on_body_entered(body: Node2D) -> void:
 	if not GameState.is_running:
 		return
 
-	var police := get_tree().get_first_node_in_group(Constants.GROUP_POLICE)
-	if police != null and police.has_method("is_returning") and police.is_returning():
-		GameState.reach_base()
+	if not _any_police_pursuing():
+		GameState.reach_base()   # pobeda SAMO kad nijedan policajac ne juri (svi odustali)
 		return
 
 	if _blocked_message_left <= 0.0:
 		GameState.garage_blocked.emit(BLOCKED_MESSAGE)
 		_blocked_message_left = blocked_message_cooldown
+
+## Da li bar JEDAN policajac aktivno juri (CHASE ili SEARCHING)?
+func _any_police_pursuing() -> bool:
+	for cop in get_tree().get_nodes_in_group(Constants.GROUP_POLICE):
+		if cop.has_method("is_actively_pursuing") and cop.is_actively_pursuing():
+			return true
+	return false
 
 func _draw() -> void:
 	var half := zone_size * 0.5
