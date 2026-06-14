@@ -14,6 +14,7 @@ var loot_amount: float = 100_000.0    # trenutni plen u novcu
 var heat_level: int = 0               # 0 = mir, 1-4 = vise policije u poteri
 var heat_blink_active: bool = false   # true kad bar jedna policija pretrazuje (SEARCHING)
 var is_running: bool = false      # da li trka trenutno traje
+var selected_heist_id: String = ""  # meta: lokacija sa mape pre starta trke
 
 # Muzika heista prati najintenzivniji police state (CHASE > SEARCHING > RETURNING).
 enum PursuitMusic { RETURNING, SEARCHING, CHASING }

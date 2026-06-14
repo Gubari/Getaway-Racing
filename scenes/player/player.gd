@@ -88,7 +88,15 @@ func _ready() -> void:
 	_camera.make_current()
 	get_viewport().size_changed.connect(_on_viewport_size_changed)
 	_sync_drive_params()
+	_apply_car_upgrades()
 	_update_car_sprite()
+
+func _apply_car_upgrades() -> void:
+	if CarShop == null:
+		return
+	max_speed = CarShop.apply_speed(max_speed)
+	crash_loot_penalty = CarShop.apply_crash_penalty(crash_loot_penalty)
+	_sync_drive_params()
 
 func _sync_drive_params() -> void:
 	_drive.acceleration = acceleration
