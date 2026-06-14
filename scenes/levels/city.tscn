@@ -901,10 +901,17 @@ spawn_interval = 14.0
 position = Vector2(3596, 1987)
 
 [node name="PoliceSpawnerSpawn" type="Marker2D" parent="HeistProfiles/downtown" unique_id=1847293653]
-position = Vector2(1393, 274)
+position = Vector2(4814, 1001)
 
 [node name="GarageSpawn" type="Marker2D" parent="HeistProfiles/downtown" unique_id=1847293654]
 position = Vector2(239, 469)
+
+[node name="Police" parent="HeistProfiles/downtown" unique_id=2076363555 instance=ExtResource("6_police")]
+position = Vector2(3146.0002, 2001)
+rotation = 6.2321243
+chase_speed = 300.0
+search_speed = 280.0
+vision_range = 450.0
 
 [node name="port" type="Node2D" parent="HeistProfiles" unique_id=1847293660]
 script = ExtResource("9_heist")
@@ -917,15 +924,22 @@ max_police = 6
 spawn_interval = 11.0
 
 [node name="PlayerSpawn" type="Marker2D" parent="HeistProfiles/port" unique_id=1847293661]
-position = Vector2(3312, 142)
-rotation = -0.028841019
+position = Vector2(3217.9998, 143.99998)
+rotation = -11.001138
 
 [node name="PoliceSpawnerSpawn" type="Marker2D" parent="HeistProfiles/port" unique_id=1847293662]
-position = Vector2(1956.0002, 1130)
-rotation = 3.1303415
+position = Vector2(4814.0005, 1001)
+rotation = 0.004260063
 
 [node name="GarageSpawn" type="Marker2D" parent="HeistProfiles/port" unique_id=1847293663]
 position = Vector2(239, 469)
+
+[node name="Police" parent="HeistProfiles/port" unique_id=619725540 instance=ExtResource("6_police")]
+position = Vector2(2822.9998, 143)
+rotation = 0.003556013
+chase_speed = 300.0
+search_speed = 280.0
+vision_range = 450.0
 
 [node name="industrial" type="Node2D" parent="HeistProfiles" unique_id=1847293670]
 script = ExtResource("9_heist")
@@ -943,11 +957,14 @@ spawn_interval = 9.0
 position = Vector2(5062, 495)
 
 [node name="PoliceSpawnerSpawn" type="Marker2D" parent="HeistProfiles/industrial" unique_id=1847293672]
-position = Vector2(4163, 1915)
-rotation = -1.5244312
+position = Vector2(4812, 1002)
+rotation = -0.016438246
 
 [node name="GarageSpawn" type="Marker2D" parent="HeistProfiles/industrial" unique_id=1847293673]
-position = Vector2(239, 463)
+position = Vector2(239, 469)
+
+[node name="Police" parent="HeistProfiles/industrial" unique_id=970396048 instance=ExtResource("6_police")]
+position = Vector2(3795, 495)
 
 [node name="Spawns" type="Node2D" parent="." unique_id=925044423]
 
