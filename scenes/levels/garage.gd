@@ -28,8 +28,8 @@ func _on_body_entered(body: Node2D) -> void:
 	if not GameState.is_running:
 		return
 
-	if not _any_police_pursuing():
-		# Pobeda SAMO kad nijedan ne juri. Ako postoji cinematic -> pokreni ga (on zove reach_base).
+	if not _any_police_chasing():
+		# Pobeda kad te NIKO trenutno ne vidi (svi zuti/sivi). Cinematic zove reach_base.
 		var cine := get_tree().get_first_node_in_group("win_cinematic")
 		if cine != null and cine.has_method("play_win"):
 			cine.play_win()
@@ -41,10 +41,11 @@ func _on_body_entered(body: Node2D) -> void:
 		GameState.garage_blocked.emit(BLOCKED_MESSAGE)
 		_blocked_message_left = blocked_message_cooldown
 
-## Da li bar JEDAN policajac aktivno juri (CHASE ili SEARCHING)?
-func _any_police_pursuing() -> bool:
+## Da li te bar JEDAN policajac trenutno VIDI (CHASE/crveno)? Zut (SEARCHING) i
+## siv (RETURNING) ne blokiraju - oni ne znaju gde si.
+func _any_police_chasing() -> bool:
 	for cop in get_tree().get_nodes_in_group(Constants.GROUP_POLICE):
-		if cop.has_method("is_actively_pursuing") and cop.is_actively_pursuing():
+		if cop.has_method("is_chasing") and cop.is_chasing():
 			return true
 	return false
 
