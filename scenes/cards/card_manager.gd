@@ -73,4 +73,6 @@ func _spawn_effect(ab: Card) -> void:
 		fx.global_position = player.get_rear_spawn_point()   # A-jev helper
 	else:
 		fx.global_position = player.global_position - Vector2.RIGHT.rotated(player.rotation) * 48.0
+	# Okreni POPRECNO na pravac voznje (barikada preprecuje put po sirini).
+	fx.rotation = player.rotation + PI / 2.0
 	get_tree().current_scene.add_child(fx)

@@ -17,10 +17,14 @@ enum State { CHASE, SEARCHING, RETURNING }
 @export var search_time: float = 6.0          # ukupno vreme pretrage pre RETURNING
 @export var look_time: float = 0.8            # pauza da "osmotri" na svakoj tacki
 @export var peek_distance: float = 200.0      # bazni domet "juri kuda je pobegao" (obilazi zid)
-@export var patrol_radius: float = 140.0      # radijus laganog krstarenja u RETURNING
+@export var patrol_radius: float = 220.0      # radijus krstarenja u RETURNING (vece = duze deonice)
 @export var catch_distance: float = 28.0      # kad te stigne izbliza -> uhvacen
 @export var skid_spin: float = 7.0            # brzina vrtnje dok je bez kontrole (ulje)
 @export var skid_friction: float = 160.0      # koliko brzo klizanje usporava
+@export var barricade_smash_speed: float = 170.0   # iznad ove brzine PROBIJE barikadu (umesto da skrene)
+@export var barricade_smash_slowdown: float = 0.25 # koliko ostane brzine posle probijanja
+@export var corner_min_speed: float = 0.35    # min mnozilac brzine u najostrijem zaokretu (koci za zaokret)
+@export var approach_distance: float = 120.0  # u roamu: u ovom dometu od mete pocinje da usporava (da stane, ne kruzi)
 
 @export_group("Driving")
 @export var acceleration: float = 480.0
@@ -65,9 +69,11 @@ var lose_timer: float = 0.0                    # grace dok jos "pamti" igraca u 
 var _control_lost_timer: float = 0.0
 var _spin_dir: float = 1.0
 
-# watchdog protiv zaglavljivanja
+# watchdog protiv zaglavljivanja + spin (donut) detekcija
 var _last_dist: float = INF
 var _stuck_timer: float = 0.0
+var _heading_accum: float = 0.0     # ukupno okretanje ka trenutnoj meti
+var _prev_heading: float = 0.0
 
 var _drive := TopDownCarDriving.new()
 var _car_anim_accum: float = 0.0
@@ -85,7 +91,7 @@ func _ready() -> void:
 	last_known_pos = player.global_position if player != null else global_position
 	move_target = last_known_pos
 	agent.path_desired_distance = 8.0
-	agent.target_desired_distance = 16.0
+	agent.target_desired_distance = 24.0   # veci prag "stigao" -> ne trazi pikselsku preciznost (manje kruzenja)
 	_sync_drive_params()
 
 func _sync_drive_params() -> void:
@@ -222,13 +228,15 @@ func _do_searching(delta: float, can_see: bool) -> void:
 		_set_target(_patrol_point())
 		return
 
-	_move(delta, search_speed)
-	# stigao na metu ILI zaglavljen -> osmotri pa sledece planirano mesto
+	# stigao na metu ILI zaglavljen -> STANI i osmotri (ne kruzi), pa sledeca tacka
 	if _arrived() or _is_stuck(delta):
+		_idle(delta)
 		look_timer -= delta
 		if look_timer <= 0.0:
 			_next_search_point()
 			look_timer = look_time
+	else:
+		_move(delta, search_speed, true)
 
 func _next_search_point() -> void:
 	if search_queue.is_empty():
@@ -240,13 +248,18 @@ func _do_returning(delta: float, can_see: bool) -> void:
 	if can_see:
 		state = State.CHASE   # cim te spaze -> instant CHASE
 		return
-	_move(delta, return_speed)
-	# lagano krstari po zoni - nije aktivna potera, ali nije ni mrtav
-	if _arrived() or _is_stuck(delta):
+	# Krstari KONTINUIRANO: stigne na tacku -> ODMAH uzme novu (napred), ne staje.
+	# Stane samo ako se stvarno zaglavi ili navrti (donut).
+	if _is_stuck(delta):
+		_idle(delta)
 		look_timer -= delta
 		if look_timer <= 0.0:
 			_set_target(_patrol_point())
-			look_timer = look_time * 1.5   # opusteniji ritam nego u pretrazi
+			look_timer = look_time
+	else:
+		if _arrived():
+			_set_target(_patrol_point())   # nastavi dalje bez stajanja
+		_move(delta, return_speed)
 
 # --- KRETANJE (preko navmesh-a) ---
 func _set_target(t: Vector2) -> void:
@@ -254,14 +267,17 @@ func _set_target(t: Vector2) -> void:
 	agent.target_position = t
 	_last_dist = INF
 	_stuck_timer = 0.0
+	_heading_accum = 0.0
+	_prev_heading = rotation
 
-func _move(delta: float, speed_cap: float) -> void:
+func _move(delta: float, speed_cap: float, slow_near_target: bool = false) -> void:
 	if _control_lost_timer > 0.0:
 		_skid(delta)
 		return
 
 	var throttle := 0.0
 	var steer_input := 0.0
+	var cap := speed_cap
 
 	if not agent.is_navigation_finished():
 		var next_point := agent.get_next_path_position()
@@ -274,12 +290,41 @@ func _move(delta: float, speed_cap: float) -> void:
 				1.0
 			)
 			throttle = 1.0
+			cap = speed_cap * _speed_factor(angle_diff, slow_near_target)
 
-	var pre_move_velocity := _drive.physics_step(self, delta, throttle, steer_input, speed_cap)
+	var pre_move_velocity := _drive.physics_step(self, delta, throttle, steer_input, cap)
 	if wall_crash_enabled:
 		_drive.move_and_handle_walls(self, pre_move_velocity, 0.0)
 	else:
 		move_and_slide()
+
+	_check_barricade_smash()
+
+## Mnozilac brzine: ostriji zaokret (uvek) + prilazak meti (samo roam) -> sporije.
+## Sporije = manji radijus okretanja -> prati put oko zgrade i STIGNE na tacku (ne kruzi).
+func _speed_factor(angle_diff: float, slow_near_target: bool) -> float:
+	var turn_f := lerpf(1.0, corner_min_speed, clampf(absf(angle_diff) / PI, 0.0, 1.0))
+	if not slow_near_target:
+		return turn_f
+	var approach_f := clampf(global_position.distance_to(move_target) / approach_distance, corner_min_speed, 1.0)
+	return minf(turn_f, approach_f)
+
+## Pri velikoj brzini policija PROBIJE barikadu (ona puca) i to je uspori.
+## Barikada nije u grupi walls pa je kolegin wall-crash ignorise - hvatamo je ovde.
+func _check_barricade_smash() -> void:
+	if absf(_drive.get_forward_speed()) < barricade_smash_speed:
+		return
+	for i in get_slide_collision_count():
+		var c := get_slide_collision(i).get_collider()
+		if c and c.has_method("smash"):
+			c.smash()
+			_drive.forward_speed *= barricade_smash_slowdown   # probio ali usporen
+			return
+
+## Zakoci i stoji (osmatra) dok je u "look" pauzi - bez kruzenja oko bliske tacke.
+func _idle(delta: float) -> void:
+	_drive.physics_step(self, delta, 0.0, 0.0, return_speed)
+	move_and_slide()
 
 ## Poziva je ULJE: policija gubi kontrolu (klizi po inerciji + vrti se) `duration` sek.
 func lose_control(duration: float) -> void:
@@ -304,13 +349,48 @@ func _is_stuck(delta: float) -> bool:
 		_stuck_timer = 0.0
 	else:
 		_stuck_timer += delta
-	return _stuck_timer > 0.6   # ne napreduje 0.6s -> tretiraj kao zaglavljen
+	# spin watchdog: previse navrteo ka istoj meti (donut) -> tretiraj kao zaglavljen
+	_heading_accum += absf(wrapf(rotation - _prev_heading, -PI, PI))
+	_prev_heading = rotation
+	return _stuck_timer > 0.6 or _heading_accum > deg_to_rad(300.0)
 
 func _random_search_point() -> Vector2:
-	return last_known_pos + Vector2(randf_range(-160, 160), randf_range(-160, 160))
+	return _roam_point(last_known_pos, 160.0)
 
 func _patrol_point() -> Vector2:
-	return last_known_pos + Vector2(randf_range(-patrol_radius, patrol_radius), randf_range(-patrol_radius, patrol_radius))
+	return _roam_point(last_known_pos, patrol_radius)
+
+## Roam tacka: "opipa" zidove zracima i bira NAJOTVORENIJI pravac napred (kao kola
+## koja prate ulicu) -> nema ostrih zaokreta u zid. Ako je odlutao predaleko od
+## zone -> bazni smer je nazad ka njoj. Snap na navmesh.
+func _roam_point(center: Vector2, radius: float) -> Vector2:
+	var base := rotation                             # podrazumevano: napred
+	var to_center := center - global_position
+	if to_center.length() > radius * 1.3:
+		base = to_center.angle()                     # odlutao -> nazad ka zoni
+
+	var space := get_world_2d().direct_space_state
+	var best_dir := base
+	var best_clear := -1.0
+	for offset in [0.0, -0.45, 0.45, -0.9, 0.9]:     # napred + blagi otkloni
+		var clear := _clear_distance(space, base + offset, radius)
+		if clear > best_clear:
+			best_clear = clear
+			best_dir = base + offset
+
+	var dist := clampf(best_clear - 40.0, 60.0, radius)   # idi tamo, ali stani pre zida
+	var p := global_position + Vector2.from_angle(best_dir) * dist
+	return NavigationServer2D.map_get_closest_point(agent.get_navigation_map(), p)
+
+## Cist domet do zida u datom smeru (za biranje otvorenog pravca u roamu).
+func _clear_distance(space: PhysicsDirectSpaceState2D, dir: float, max_dist: float) -> float:
+	var to := global_position + Vector2.from_angle(dir) * max_dist
+	var q := PhysicsRayQueryParameters2D.create(global_position, to, Constants.LAYER_WALLS)
+	q.exclude = [self]
+	var hit := space.intersect_ray(q)
+	if hit.is_empty():
+		return max_dist
+	return global_position.distance_to(hit.position)
 
 func is_returning() -> bool:
 	return state == State.RETURNING

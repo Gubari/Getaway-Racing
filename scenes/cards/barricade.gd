@@ -17,5 +17,10 @@ func _expire() -> void:
 	queue_free()
 	_mark_nav_dirty()                          # vrati navmesh kad nestane
 
+## Pozove je policija kad je probije pri velikoj brzini (puca).
+func smash() -> void:
+	queue_free()
+	_mark_nav_dirty()
+
 func _mark_nav_dirty() -> void:
 	get_tree().call_group("nav_region", "rebake")
