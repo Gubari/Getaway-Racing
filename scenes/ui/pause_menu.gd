@@ -4,8 +4,7 @@ extends CanvasLayer
 ## Settings: SFX i Music slajderi (kontrolisu audio buseve) + Return.
 ## Vlasnik: D.
 
-const SETTINGS_PATH := "user://settings.cfg"
-const MIN_DB := -40.0   # ispod ovoga = potpuna tisina (mute)
+const _AudioSettings := preload("res://scripts/audio_settings.gd")
 
 @onready var _dim: ColorRect = $Dim
 @onready var _pause_panel: Control = $PausePanel
@@ -20,14 +19,9 @@ const MIN_DB := -40.0   # ispod ovoga = potpuna tisina (mute)
 @onready var _music_slider: HSlider = $SettingsPanel/Frame/VBox/MusicRow/MusicSlider
 @onready var _return_btn: Button = $SettingsPanel/Frame/VBox/ReturnBtn
 
-var _music_bus := -1
-var _sfx_bus := -1
-
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_music_bus = AudioServer.get_bus_index("Music")
-	_sfx_bus = AudioServer.get_bus_index("SFX")
-	if _music_bus < 0 or _sfx_bus < 0:
+	if AudioServer.get_bus_index("Music") < 0 or AudioServer.get_bus_index("SFX") < 0:
 		push_warning("PauseMenu: Music/SFX audio bus nije pronadjen — proveri project.godot [audio].")
 
 	# UI klik zvuk vise nije ovde - globalni Audio autoload ga svira na svako
@@ -37,13 +31,11 @@ func _ready() -> void:
 	_abandon_btn.pressed.connect(_abandon)
 	_return_btn.pressed.connect(_close_settings)
 	_pause_button.pressed.connect(_toggle_pause)
-	_sfx_slider.value_changed.connect(_on_sfx_changed)
-	_music_slider.value_changed.connect(_on_music_changed)
+	_AudioSettings.bind_sliders(_sfx_slider, _music_slider)
 
 	GameState.game_won.connect(_force_close)
 	GameState.game_over.connect(_force_close)
 
-	_load_settings()
 	_close()
 
 func _input(event: InputEvent) -> void:
@@ -104,45 +96,4 @@ func _abandon() -> void:
 	GameState.abandon()
 	Audio.stop_heist_music()
 	get_tree().paused = false
-	get_tree().reload_current_scene()
-
-# ------------------------------------------------------------------
-# Audio: slajder (0..1) -> bus volume (dB). 0 = mute.
-# ------------------------------------------------------------------
-func _on_sfx_changed(value: float) -> void:
-	_apply_volume(_sfx_bus, value)
-	_save_settings()
-
-func _on_music_changed(value: float) -> void:
-	_apply_volume(_music_bus, value)
-	_save_settings()
-
-func _apply_volume(bus: int, value: float) -> void:
-	if bus < 0:
-		return
-	if value <= 0.001:
-		AudioServer.set_bus_mute(bus, true)
-	else:
-		AudioServer.set_bus_mute(bus, false)
-		AudioServer.set_bus_volume_db(bus, linear_to_db(value))
-
-# ------------------------------------------------------------------
-# Perzistencija (user://settings.cfg)
-# ------------------------------------------------------------------
-func _load_settings() -> void:
-	var cfg := ConfigFile.new()
-	var sfx := 0.8
-	var music := 0.7
-	if cfg.load(SETTINGS_PATH) == OK:
-		sfx = cfg.get_value("audio", "sfx", sfx)
-		music = cfg.get_value("audio", "music", music)
-	_sfx_slider.set_value_no_signal(sfx)
-	_music_slider.set_value_no_signal(music)
-	_apply_volume(_sfx_bus, sfx)
-	_apply_volume(_music_bus, music)
-
-func _save_settings() -> void:
-	var cfg := ConfigFile.new()
-	cfg.set_value("audio", "sfx", _sfx_slider.value)
-	cfg.set_value("audio", "music", _music_slider.value)
-	cfg.save(SETTINGS_PATH)
+	get_tree().change_scene_to_file("res://scenes/main_menu/main_menu.tscn")

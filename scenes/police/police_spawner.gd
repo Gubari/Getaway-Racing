@@ -13,7 +13,7 @@ extends Node2D
 # Podesavanja koja se kopiraju sa statickog policajca na spawnovane (da budu isti).
 const COPY_PROPS: Array[String] = [
 	"chase_speed", "search_speed", "return_speed",
-	"lose_sight_grace", "vision_range", "wall_crash_enabled",
+	"lose_sight_grace", "search_time", "vision_range", "wall_crash_enabled",
 	"lane_spacing", "row_spacing", "formation_range",
 	"siren_volume_db", "siren_max_distance", "siren_attenuation",
 ]

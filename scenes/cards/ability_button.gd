@@ -8,6 +8,7 @@ var index: int
 
 var _color := Color(0.4, 0.4, 0.45)
 var _type: int = -1
+var _icon: Texture2D
 var _radius := 42.0
 var _time := 0.0
 var _press := 0.0
@@ -18,9 +19,11 @@ func setup(mgr: Node, idx: int) -> void:
 	index = idx
 	var ab: Card = manager.get_ability(idx)
 	_type = ab.type if ab != null else -1
+	_icon = ab.icon if ab != null else null
 	_color = _color_for(_type)
 	custom_minimum_size = Vector2(98, 98)
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
 func _process(delta: float) -> void:
 	_time += delta
@@ -79,15 +82,13 @@ func _draw_sector(c: Vector2, radius: float, start: float, end: float, color: Co
 
 func _draw_icon(c: Vector2, r: float, avail: bool) -> void:
 	var col := Color(1, 1, 1, 0.95 if avail else 0.45)
+	if _icon != null:
+		var side := r * 1.30
+		var rect := Rect2(c - Vector2(side, side) * 0.5, Vector2(side, side))
+		draw_texture_rect(_icon, rect, false, col)
+		return
 	var s := r * 0.52
 	match _type:
-		Card.Type.NITRO:   # dva chevrona (brzina)
-			for off: float in [-s * 0.5, s * 0.2]:
-				draw_polyline(PackedVector2Array([
-					c + Vector2(off - s * 0.3, -s * 0.5),
-					c + Vector2(off + s * 0.2, 0.0),
-					c + Vector2(off - s * 0.3, s * 0.5),
-				]), col, 5.0, true)
 		Card.Type.OIL:     # kapljica
 			draw_circle(c + Vector2(0, s * 0.28), s * 0.52, col)
 			draw_colored_polygon(PackedVector2Array([
@@ -113,7 +114,9 @@ func _draw_pips(c: Vector2, r: float, charges: int) -> void:
 
 func _color_for(t: int) -> Color:
 	match t:
+		Card.Type.SPIKES: return Color(0.55, 0.56, 0.62)
 		Card.Type.OIL: return Color(0.22, 0.34, 0.46)
 		Card.Type.BARRICADE: return Color(0.9, 0.5, 0.12)
 		Card.Type.NITRO: return Color(0.16, 0.52, 0.95)
+		Card.Type.JOKER: return Color(0.72, 0.18, 0.28)
 		_: return Color(0.4, 0.4, 0.45)
