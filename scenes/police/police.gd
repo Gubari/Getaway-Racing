@@ -55,6 +55,9 @@ enum State { CHASE, SEARCHING, RETURNING }
 @export_group("Sprite")
 @export var car_anim_fps: float = 14.0
 
+@export_group("Depth")
+@export var depth_sort_y_offset: float = 10.0
+
 @export_group("Siren")
 @export var siren_volume_db: float = 0.0
 @export var siren_max_distance: float = 4000.0
@@ -97,6 +100,7 @@ var _siren_on: bool = false
 
 func _ready() -> void:
 	add_to_group(Constants.GROUP_POLICE)
+	z_as_relative = false
 	player = get_tree().get_first_node_in_group(Constants.GROUP_PLAYER)
 	los_ray.collision_mask = Constants.LAYER_WALLS   # raycast vidi SAMO zidove
 	collision_mask = Constants.LAYER_WALLS | Constants.LAYER_POLICE   # sudara se sa zidovima I drugim policajcima (ne preklapaju se)
@@ -161,6 +165,7 @@ func _physics_process(delta: float) -> void:
 		State.RETURNING: _do_returning(delta, can_see)
 
 	_update_siren(state == State.CHASE or state == State.SEARCHING)
+	_update_depth_sort()
 	_update_car_sprite(delta)
 	queue_redraw()   # da se vision cone iscrta
 
@@ -456,6 +461,9 @@ func is_searching() -> bool:
 
 func is_actively_pursuing() -> bool:
 	return state == State.CHASE or state == State.SEARCHING
+
+func _update_depth_sort() -> void:
+	z_index = int(global_position.y + depth_sort_y_offset)
 
 # --- VIZUELNI KONUS (ziri mora da vidi "kad me vide") ---
 func _draw() -> void:
