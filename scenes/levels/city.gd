@@ -19,7 +19,7 @@ const CANOPY_LAYER_NAMES: Array[StringName] = [&"BuildingNonColide"]
 
 @export_group("Camera / Map Bounds")
 ## Granice kamere — kamera ne vidi van ovog pravougaonika.
-## Auto: spaja Outline/Road/Sidewalk/Buildings (puna mapa).
+## Auto: spaja Road/Sidewalk/Buildings (Outline ima off-map tile-ove van igre).
 @export var camera_bounds_from_outline: bool = true
 @export var camera_bounds_padding: Vector2 = Vector2.ZERO
 ## Rucno ako auto nije ukljucen ili Outline nije popunjen.
@@ -54,7 +54,7 @@ func get_heat_tier_maxes() -> Vector3i:
 	return Vector3i(heat_tier_1_max_cars, heat_tier_2_max_cars, heat_tier_3_max_cars)
 
 const CAMERA_BOUNDS_LAYERS: Array[StringName] = [
-	&"Outline", &"Road", &"Sidewalk", &"Buildings",
+	&"Road", &"Sidewalk", &"Buildings",
 ]
 
 func get_arena_rect() -> Rect2:
@@ -87,8 +87,12 @@ func _tile_layer_world_bounds(layer: TileMapLayer) -> Rect2:
 	if used.size == Vector2i.ZERO:
 		return Rect2()
 	var tile_size := Vector2(layer.tile_set.tile_size)
-	var top_left := layer.to_global(layer.map_to_local(used.position))
-	return Rect2(top_left, Vector2(used.size) * tile_size)
+	var half := tile_size * 0.5
+	var first_center := layer.map_to_local(used.position)
+	var last_center := layer.map_to_local(used.position + used.size - Vector2i.ONE)
+	var top_left := layer.to_global(first_center - half)
+	var bottom_right := layer.to_global(last_center + half)
+	return Rect2(top_left, bottom_right - top_left)
 
 func _apply_camera_padding(rect: Rect2) -> Rect2:
 	return Rect2(rect.position + camera_bounds_padding, rect.size - camera_bounds_padding * 2.0)

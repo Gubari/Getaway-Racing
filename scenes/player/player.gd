@@ -125,13 +125,28 @@ func _on_viewport_size_changed() -> void:
 func _apply_camera_limits() -> void:
 	if _arena_rect.size == Vector2.ZERO:
 		return
-	_camera.limit_enabled = true
+	_camera.limit_enabled = false
 	_camera.limit_smoothed = false
-	_camera.limit_left = int(_arena_rect.position.x)
-	_camera.limit_top = int(_arena_rect.position.y)
-	_camera.limit_right = int(_arena_rect.position.x + _arena_rect.size.x)
-	_camera.limit_bottom = int(_arena_rect.position.y + _arena_rect.size.y)
-	_camera.force_update_scroll()
+	_clamp_camera_to_arena()
+
+func _clamp_camera_to_arena() -> void:
+	if _arena_rect.size == Vector2.ZERO:
+		return
+	var half := get_viewport().get_visible_rect().size / (2.0 * _camera.zoom)
+	var min_pos := _arena_rect.position + half
+	var max_pos := _arena_rect.position + _arena_rect.size - half
+	var target := global_position
+	var cx := target.x
+	var cy := target.y
+	if min_pos.x <= max_pos.x:
+		cx = clampf(target.x, min_pos.x, max_pos.x)
+	else:
+		cx = _arena_rect.get_center().x
+	if min_pos.y <= max_pos.y:
+		cy = clampf(target.y, min_pos.y, max_pos.y)
+	else:
+		cy = _arena_rect.get_center().y
+	_camera.global_position = Vector2(cx, cy)
 
 func _maybe_refresh_camera_limits() -> void:
 	if _camera.zoom.is_equal_approx(_last_camera_zoom):
@@ -172,6 +187,7 @@ func _process(delta: float) -> void:
 	_update_depth_sort()
 	_update_car_sprite(delta)
 	_update_camera_effects(delta)
+	_clamp_camera_to_arena()
 	_update_engine_audio(delta)
 
 func _update_depth_sort() -> void:
